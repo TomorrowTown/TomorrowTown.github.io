@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-05T14:21:31.842Z</updated>
+    <updated>2020-11-05T15:16:05.360Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -10,4 +10,82 @@
     <logo>https://TomorrowTown.github.io/images/avatar.png</logo>
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
+    <entry>
+        <title type="html"><![CDATA[go服务器性能分析工具]]></title>
+        <id>https://TomorrowTown.github.io/post/go-fu-wu-qi-xing-neng-fen-xi-gong-ju/</id>
+        <link href="https://TomorrowTown.github.io/post/go-fu-wu-qi-xing-neng-fen-xi-gong-ju/">
+        </link>
+        <updated>2020-11-05T14:32:00.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="pprof">pprof</h2>
+<ol>
+<li>在需要监测的server源码中的main或init中引入:</li>
+</ol>
+<pre><code class="language-go">import _ &quot;net/http/pprof&quot;
+</code></pre>
+<ol start="2">
+<li>启动http监听端口，以此作为性能分析数据展示网页。</li>
+</ol>
+<pre><code class="language-go">go http.ListenAndServe(&quot;:9999&quot;, nil)
+</code></pre>
+<p>这样，默认访问地址为localhost:9999。</p>
+<blockquote>
+<p>无论是否是http服务, 都可以引入**&quot;net/http/pprof&quot;**作为性能分析的工具。</p>
+</blockquote>
+<h2 id="go-torch和flamegraph">go-torch和FlameGraph</h2>
+<ol>
+<li>安装go-torch和FlameGraph</li>
+</ol>
+<pre><code class="language-shell">go get github.com/uber/go-torch
+cd $GOPATH/src/github.com/uber/go-torch
+git clone https://github.com/brendangregg/FlameGraph.git
+sudo cp ./FlameGraph/flamegraph.pl /usr/local/bin
+</code></pre>
+<p>**NOTE: **go get到的项目默认会放到用户目录下的go文件夹，以此作为该项目的GOPATH。</p>
+<blockquote>
+<p>可能遇到的问题:<br>
+go get github.com/uber/go-torch时，有可能出现：</p>
+<pre><code class="language-shell">unrecognized import path &quot;golang.org/x/sys/unix&quot;: https fetch: Get . . . . . . i/o timeout
+</code></pre>
+<p>此时需要:</p>
+<pre><code class="language-shell">mkdir -p $GOPATH/src/golang.org.x
+cd $GOPATH/src/golang.org/x
+git clone https://github.com/golang/sys.git 即可
+</code></pre>
+</blockquote>
+<ol start="2">
+<li>安装包管理工具<br>
+glide用于编译上述下载的go-torch。</li>
+</ol>
+<pre><code class="language-shell">go get github.com/Masterminds/glide
+cd $GOPATH/src/github.com/uber/go-torch
+glide install
+</code></pre>
+<blockquote>
+<p>可能遇到的问题:<br>
+在glide install时可能出现:<br>
+<img src="https://TomorrowTown.github.io/post-images/1604588907765.png" alt="" loading="lazy"><br>
+直接无视即可。</p>
+</blockquote>
+<ol start="3">
+<li>运行测试用例</li>
+</ol>
+<pre><code class="language-shell">...... go-torch]$ go test ./...
+</code></pre>
+<blockquote>
+<p>可能遇到的问题:<br>
+出现一堆编译报错。但只要下列语句都没fail, 即可无视其他报错：<br>
+<img src="https://TomorrowTown.github.io/post-images/1604588991700.png" alt="" loading="lazy"><br>
+最后需要到GOPATH的bin目录下查看是否生成了<strong>go-torch</strong>可执行文件, 有则成功</p>
+</blockquote>
+<h2 id="运行go-torch获取火焰图">运行go-torch获取火焰图</h2>
+<p>在成功完成了上述所有步骤后，在任意文件夹下都可运行 go-torch命令了。<br>
+例：</p>
+<pre><code class="language-shell">go-torch -u http://localhost:9999 -t 30 -f perf.svg
+</code></pre>
+<p>等待30s，在运行命令的目录下就会生成一份perf.svg（默认是torch.svg）文件, 直接网页打开(实测chome/Edge可正常打开并可点击方块zoom in)该文件即可看到火焰图：<br>
+<img src="https://TomorrowTown.github.io/post-images/1604589121478.png" alt="" loading="lazy"></p>
+<p>接下来就可以愉快地进行性能分析啦 😃<br>
+<strong>NOTE：<strong>火焰图中，纵轴从下到上代表</strong>调用顺序</strong>，横轴每个方块的宽度代表<strong>占用CPU的时长百分比</strong>。</p>
+]]></content>
+    </entry>
 </feed>
