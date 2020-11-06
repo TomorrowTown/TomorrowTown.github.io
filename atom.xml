@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-05T15:16:05.360Z</updated>
+    <updated>2020-11-06T07:14:08.792Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -40,7 +40,7 @@ cd $GOPATH/src/github.com/uber/go-torch
 git clone https://github.com/brendangregg/FlameGraph.git
 sudo cp ./FlameGraph/flamegraph.pl /usr/local/bin
 </code></pre>
-<p>**NOTE: **go get到的项目默认会放到用户目录下的go文件夹，以此作为该项目的GOPATH。</p>
+<p>NOTE: go get到的项目默认会放到用户目录下的go文件夹，以此作为该项目的GOPATH。</p>
 <blockquote>
 <p>可能遇到的问题:<br>
 go get github.com/uber/go-torch时，有可能出现：</p>
@@ -85,7 +85,7 @@ glide install
 <p>等待30s，在运行命令的目录下就会生成一份perf.svg（默认是torch.svg）文件, 直接网页打开(实测chome/Edge可正常打开并可点击方块zoom in)该文件即可看到火焰图：<br>
 <img src="https://TomorrowTown.github.io/post-images/1604589121478.png" alt="" loading="lazy"></p>
 <p>接下来就可以愉快地进行性能分析啦 😃<br>
-<strong>NOTE：<strong>火焰图中，纵轴从下到上代表</strong>调用顺序</strong>，横轴每个方块的宽度代表<strong>占用CPU的时长百分比</strong>。</p>
+<strong>Tips：<strong>火焰图中，纵轴从下到上代表</strong>调用顺序</strong>，横轴每个方块的长度代表<strong>占用CPU的时长百分比</strong>。</p>
 ]]></content>
     </entry>
 </feed>
