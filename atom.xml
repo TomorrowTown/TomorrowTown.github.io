@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-12T09:11:55.856Z</updated>
+    <updated>2020-11-12T09:27:29.833Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -85,7 +85,7 @@ glide install
 <p>等待30s，在运行命令的目录下就会生成一份perf.svg（默认是torch.svg）文件, 直接网页打开(实测chome/Edge可正常打开并可点击方块zoom in)该文件即可看到火焰图：<br>
 <img src="https://TomorrowTown.github.io/post-images/1604589121478.png" alt="" loading="lazy"></p>
 <h2 id="进一步寻找性能痛点">进一步寻找性能痛点</h2>
-<p>再次用相同的测试条件测试，不过现在需要先运行：</p>
+<p>再次用相同的测试条件测试，不过现在仅需要运行：</p>
 <pre><code class="language-shell">go tool pprof --seconds 60 http://localhost:9999/debug/pprof/profile
 </code></pre>
 <p>60s后会得到cpu分析文件，此时不再是火焰图。<br>
