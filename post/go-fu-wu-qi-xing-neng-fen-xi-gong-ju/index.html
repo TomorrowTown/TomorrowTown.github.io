@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605173247602">
+<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605173834624">
 <link rel="stylesheet" href="https://TomorrowTown.github.io/styles/main.css">
 
 
@@ -37,7 +37,7 @@ go http.ListenAn..." />
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://TomorrowTown.github.io">
-        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605173247602" class="site-logo">
+        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605173834624" class="site-logo">
         <h1 class="site-title">tomorrow</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -180,7 +180,9 @@ glide install
 </code></pre>
 <p>60s后会得到cpu分析文件，此时不再是火焰图。<br>
 根据之前获得的火焰图，找到不应该占用那么多CPU但是却占用了那么多的方法。<br>
-在命令行窗口(pprof)后输入<strong>list 方法名</strong>，(ps: 输入exit可退出go tool pprof)<br>
+在命令行窗口(pprof)后输入<strong>list 方法名</strong>，<br>
+如果找到了具体哪一步消耗的cpu高，如果该步是另一个包的方法，也无所谓，直接<strong>list 方法名</strong>即可。<br>
+(ps: 输入exit可退出go tool pprof)<br>
 会得到该方法中具体哪一步cpu消耗的值，进而得到了该方法的性能痛点。<br>
 最后就着手优化吧:)</p>
 <p><strong>Tips：<strong>火焰图中，纵轴从下到上代表</strong>调用顺序</strong>，横轴每个方块的长度代表<strong>占用CPU的时长百分比</strong>。</p>
