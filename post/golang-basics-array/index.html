@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Golang Basics--Array | tomorrow</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605190016915">
+<link rel="stylesheet" href="https://TomorrowTown.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Array is a sequence of fixed-lenth elements of a specific type, An array can consist of zero or more elements. The lengt..." />
+    <meta name="keywords" content="golang" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://TomorrowTown.github.io">
+        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605190016915" class="site-logo">
+        <h1 class="site-title">tomorrow</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://TomorrowTown.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://TomorrowTown.github.io/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://TomorrowTown.github.io/archives" class="site-nav">
+            文档
+          </a>
+        
+      
+        
+          <a href="https://TomorrowTown.github.io/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Remember to look up at the stars and not on your feet.
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://TomorrowTown.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Golang Basics--Array</h2>
+            <div class="post-date">2020-11-12</div>
+            
+              <div class="feature-container" style="background-image: url('https://TomorrowTown.github.io/post-images/golang-basics-array.jpeg')">
+              </div>
+            
+            <div class="post-content" v-pre>
+              <p>Array is a sequence of fixed-lenth elements of a specific type, An array can consist of zero or more elements. The length of the array <u>is a part of array type,</u> array composed of different lengths or different types of data are diffenrent types, so arrays are rarely used directly in Go language(arrays of different lengths cannot be directly assigned because of different types). The type corresponding to the array is a slice, a slice is a sequence that can grow and shrink dynamically.</p>
+<pre><code class="language-Go">var a [3]int                        // define an int-type array of length 3, all the elements are 0
+var b = [...]int{1, 2, 3}           // define an int-type array of length 3, elements are 1, 2, 3
+var c = [...]int{2: 3, 1: 2}        // define an int-type of length 3, elements are 0, 2, 3
+var d = [...]int{1, 2, 4: 5, 6}     // define an int-type of length 3, elements are 1, 2, 0, 0, 5, 6, 
+
+/*
+Pay attention to the 3rd and 4th ways to define an array.
+The 3rd way: The elements of the array are initialized by index, so the order in which the element's initialization values appear is arbitrary. This initialization method is similar to the initialization syntax of map [int]Type. The length of the array is based on the largest index that apppears, and elements that are not explicitly initialized are still initialized with a value of 0.
+The 4th way: Mixing the second and third initialization methods.
+*/
+</code></pre>
+<p><em>Memory structure:</em><br>
+<img src="https://TomorrowTown.github.io/post-images/1605189729922.png" alt="" loading="lazy"></p>
+<p>Arrays in Go are value sementics. <u>An array variable represents the entire array. It is not an implicit pointer to the first element</u>(such as an array in C), but a complete value. When an array variable is assigned or passed, <u>the entire array is actually copied.</u><br>
+If the array is large, the assignment of the array will also have a large overhead. To avoid the overhead of copying an array, you can pass a pointer to the array, but <u>the array pointer is not an array.</u></p>
+<pre><code class="language-Go">var a = [...]int{1, 2, 3}
+var b = &amp;a
+
+fmt.Println(a[0], a[1])     // Prints the first two elements of the array
+fmt.Println(b[0], b[1])     // Accessing array elements through array pointer is similar to arrays
+
+// Iterate through the elements of an array through array pointer.
+for i, v = range b {
+    ......
+}
+</code></pre>
+<h2 id="common-ways-to-traverse-an-array">Common ways to traverse an array</h2>
+<pre><code class="language-Go">for i := range a {
+}
+for i, v := range a {
+}
+for i := 0 ; i &lt; len(a); i++ {
+}
+</code></pre>
+<p>The performance of <strong>for range</strong> may be better, because this iteration can ensure that the array does not exceed the boundary, and the iteration of the array element can be omitted from the judgement of the subscript boundary.</p>
+<h2 id="more-uses-for-array">More uses for array</h2>
+<p>Array can be used not only for numeric types, but also string array, structure array, function array, interface array, pipe array, etc:</p>
+<pre><code class="language-Go">// string array
+var s1 = [...]string{&quot;hello&quot;, &quot;world&quot;}
+
+// structure array
+var line = [...]image.point{{0, 0}, {1, 1}}
+
+// function array
+var decoder = [...]func(io.Reader) (image.Image, error) {
+    png.Decode,
+    jpeg.Decode,
+}
+// interface array
+var unknown = [...]interface{}{123, &quot;hello&quot;}
+
+// pipe array
+var chanList = [2]chan int{}
+</code></pre>
+<p>We can also define a empty array:</p>
+<pre><code class="language-Go">var d = [0]int
+var e = [0]int{}
+var f = [...]int{}
+</code></pre>
+<p>An array of length 0 does not occupy space in memory. Although empty array is rarely used directly, they can be used to emphasize certain types of operations to avoid allocating additional memory space, such as for pipeline synchronization operations:</p>
+<pre><code class="language-Go">c1 := make(chan [0]int)
+go func() {
+    fmt.Println(&quot;c1&quot;)
+    c1 &lt;- [0]int{}
+}()
+&lt;- c1
+</code></pre>
+<p>Here, we do not care about the actual type of data transmitted in the pipeline, where the pipeline receive and send operations are only used for message synchronization. For this scenario, we use an empty array as the pipeline type to reduce the overhead of pipeline element assignment. Of course, it is generally more preferred to use typeless anonymous structure instead.</p>
+<pre><code class="language-Go">c2 := make(chan struct{})
+go func() {
+    fmt.Println(&quot;c2&quot;)
+    c2 &lt;- struct{}{}    // The part of 'struc{}' means type, and the '{}' represents the value of the structure
+}()
+&lt;- c2
+</code></pre>
+<p>In Go, array types are the basis of structures such as slices and string. Many operations obove of the array can be use directly for string or slice.</p>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">《Advanced Go Programming》</a></p>
+</blockquote>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://TomorrowTown.github.io/tag/lXXd7xbfA/" class="tag">
+                    golang
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://TomorrowTown.github.io/post/go-fu-wu-qi-xing-neng-fen-xi-gong-ju/">
+                  <h3 class="post-title">
+                    go服务器性能分析工具
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
