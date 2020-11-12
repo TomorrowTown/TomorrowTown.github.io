@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-12T09:08:29.267Z</updated>
+    <updated>2020-11-12T09:11:55.856Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -90,7 +90,7 @@ glide install
 </code></pre>
 <p>60s后会得到cpu分析文件，此时不再是火焰图。<br>
 根据之前获得的火焰图，找到不应该占用那么多CPU但是却占用了那么多的方法。<br>
-在命令行窗口(pprof)后输入<strong>list 方法名</strong>，<br>
+在命令行窗口(pprof)后输入<strong>list 方法名</strong>，(ps: 输入exit可退出go tool pprof)<br>
 会得到该方法中具体哪一步cpu消耗的值，进而得到了该方法的性能痛点。<br>
 最后就着手优化吧:)</p>
 <p><strong>Tips：<strong>火焰图中，纵轴从下到上代表</strong>调用顺序</strong>，横轴每个方块的长度代表<strong>占用CPU的时长百分比</strong>。</p>
