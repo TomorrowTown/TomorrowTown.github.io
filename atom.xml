@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-16T17:09:01.417Z</updated>
+    <updated>2020-11-16T17:12:50.295Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -112,7 +112,7 @@ if (cmd) { cmd-&gt;execute(actor); }
 </code></pre>
 <h3 id="undoredo"><strong>undo&amp;redo</strong></h3>
 <p>命令模式一个重要的应用就是“撤销操作”。因为命令对象可以<strong>do</strong>一些事，那么就应该能够轻松地<strong>undo</strong>它们。这在游戏中应用广泛，比如策略游戏中的回滚操作，以及一些游戏的重播功能。<br>
-与上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
+上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
 示例代码：<br>
 封装移动操作：</p>
 <pre><code class="language-cpp">class MoveUnitCmd : public Command

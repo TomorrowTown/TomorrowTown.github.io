@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605546535824">
+<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605546765218">
 <link rel="stylesheet" href="https://TomorrowTown.github.io/styles/main.css">
 
 
@@ -34,7 +34,7 @@ void..." />
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://TomorrowTown.github.io">
-        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605546535824" class="site-logo">
+        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605546765218" class="site-logo">
         <h1 class="site-title">tomorrow</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -199,7 +199,7 @@ if (cmd) { cmd-&gt;execute(actor); }
 </code></pre>
 <h3 id="undoredo"><strong>undo&amp;redo</strong></h3>
 <p>命令模式一个重要的应用就是“撤销操作”。因为命令对象可以<strong>do</strong>一些事，那么就应该能够轻松地<strong>undo</strong>它们。这在游戏中应用广泛，比如策略游戏中的回滚操作，以及一些游戏的重播功能。<br>
-与上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
+上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
 示例代码：<br>
 封装移动操作：</p>
 <pre><code class="language-cpp">class MoveUnitCmd : public Command
