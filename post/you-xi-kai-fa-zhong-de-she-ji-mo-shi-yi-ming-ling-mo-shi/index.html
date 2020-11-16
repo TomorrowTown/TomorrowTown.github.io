@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605546132408">
+<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605546535824">
 <link rel="stylesheet" href="https://TomorrowTown.github.io/styles/main.css">
 
 
@@ -25,7 +25,7 @@
 它会记录输入并转换为游戏中的一个动作。
 简单实现：
 void..." />
-    <meta name="keywords" content="" />
+    <meta name="keywords" content="设计模式" />
   </head>
   <body>
     <div id="app" class="main">
@@ -34,7 +34,7 @@ void..." />
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://TomorrowTown.github.io">
-        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605546132408" class="site-logo">
+        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605546535824" class="site-logo">
         <h1 class="site-title">tomorrow</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -99,6 +99,9 @@ void..." />
             <h2 class="post-title">游戏开发中的设计模式(一) -- 命令模式</h2>
             <div class="post-date">2020-11-16</div>
             
+              <div class="feature-container" style="background-image: url('https://TomorrowTown.github.io/post-images/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi.jpeg')">
+              </div>
+            
             <div class="post-content" v-pre>
               <p>A command is a reified method call.</p>
 <h2 id="使用场景示例"><strong>使用场景示例</strong></h2>
@@ -106,7 +109,7 @@ void..." />
 <p>每个游戏都有一处代码块用来处理用户原始的输入，如：按钮点击、键盘事件、鼠标点击等。<br>
 它会记录输入并转换为游戏中的一个动作。<br>
 简单实现：</p>
-<pre><code class="language-C++">void InputHandler::handleInput()
+<pre><code class="language-cpp">void InputHandler::handleInput()
 {
     if (isPressed(BUTTON_X)) jump();
     else if (isPressed(BUTTON_Y)) fire();
@@ -118,7 +121,7 @@ void..." />
 所以，为了支持自定义，我们需要把对jump()、fire()等方法的直接调用转换为<strong>可更换的</strong>东西。<br>
 因此我们需要使用对象来代表一个游戏动作。这就用到了命令模式。<br>
 首先，定义一个基类，代表一个可触发的游戏命令：</p>
-<pre><code class="language-C++">class Command
+<pre><code class="language-cpp">class Command
 {
 public:
     virtual ~Command() {}
@@ -126,7 +129,7 @@ public:
 };
 </code></pre>
 <p>然后为每一个不同的游戏动作创建一个子类：</p>
-<pre><code class="language-C++">class JumpCmd : public Command
+<pre><code class="language-cpp">class JumpCmd : public Command
 {
 public:
     virtual void execute() { jump(); }
@@ -140,7 +143,7 @@ class FireCmd : public Command
 /// #TODO: add more action subclass . . .
 </code></pre>
 <p>在输入处理中，为每个按钮存储一个指向命令的指针：</p>
-<pre><code class="language-C++">class InputHandler
+<pre><code class="language-cpp">class InputHandler
 {
 public:
     void handleInput();
@@ -155,7 +158,7 @@ private:
 };
 </code></pre>
 <p>现在对输入的处理便通过这些指针进行<strong>代理</strong>：</p>
-<pre><code class="language-C++">void InputHandler::handleInput()
+<pre><code class="language-cpp">void InputHandler::handleInput()
 {
     if (isPressed(BUTTON_X)) button_X-&gt;execute();
     else if (isPressed(BUTTON_Y) button_Y-&gt;execute();
@@ -166,7 +169,7 @@ private:
 <p>之前每个输入都会直接调用一个函数，现在则增加了一个间接调用层。</p>
 <h4 id="解耦角色和命令"><strong>解耦角色和命令</strong></h4>
 <p>在上例中，这些命令的使用范围很窄，只能作用于玩家对象。现在，让我们放宽限制，传入任何一个我们想要控制的对象，而不是让命令自身来确定所控制的对象：</p>
-<pre><code class="language-C++">class Command
+<pre><code class="language-cpp">class Command
 {
 public:
     virtual ~Command() {}
@@ -180,7 +183,7 @@ public:
 };
 </code></pre>
 <p>接下来修改输入处理方法，使其返回一个命令实例，以便调用具体的execute()：</p>
-<pre><code class="language-C++">Command* InputHandler::handleInput()
+<pre><code class="language-cpp">Command* InputHandler::handleInput()
 {
     if (isPressed(BUTTON_X)) return button_X;
     if (isPressed(BUTTON_Y)) return button_Y;
@@ -191,7 +194,7 @@ public:
 }
 </code></pre>
 <p>最终，对输入的处理转化为动作的映射代码如下：</p>
-<pre><code class="language-C++">Command* cmd = inputHandler.handleInput();
+<pre><code class="language-cpp">Command* cmd = inputHandler.handleInput();
 if (cmd) { cmd-&gt;execute(actor); }
 </code></pre>
 <h3 id="undoredo"><strong>undo&amp;redo</strong></h3>
@@ -199,7 +202,7 @@ if (cmd) { cmd-&gt;execute(actor); }
 与上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
 示例代码：<br>
 封装移动操作：</p>
-<pre><code class="language-C++">class MoveUnitCmd : public Command
+<pre><code class="language-cpp">class MoveUnitCmd : public Command
 {
 public:
     MoveUnitCmd(Unit* unit, int x, int y) : mUnit(uint), mX(x), mY(y) {}
@@ -212,7 +215,7 @@ private:
 };
 </code></pre>
 <p>之前的输入处理程序仅维护单一的命令对象，并在对应按钮被按下时调用其execute()方法。但这里，命令将更加具体，这意味着每次玩家选择一个动作，输入处理程序代码都会创建一个命令实例：</p>
-<pre><code class="language-C++">Command* handleInput()
+<pre><code class="language-cpp">Command* handleInput()
 {
     Unit* unit = getSelectedUnit();
 
@@ -232,7 +235,7 @@ private:
 }
 </code></pre>
 <p>Command类新增undo方法：</p>
-<pre><code class="language-C++">class Command
+<pre><code class="language-cpp">class Command
 {
 public:
     virtual ~Command() {}
@@ -241,7 +244,7 @@ public:
 }
 </code></pre>
 <p>进一步，修改上述子类，实现undo方法：</p>
-<pre><code class="language-C++">class MoveUnitCmd : public Command
+<pre><code class="language-cpp">class MoveUnitCmd : public Command
 {
 public:
     MoveUnitCmd(Unit* unit, int x, int y)
@@ -277,6 +280,14 @@ private:
 </blockquote>
 
             </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://TomorrowTown.github.io/tag/4AAgEC-1o/" class="tag">
+                    设计模式
+                  </a>
+                
+              </div>
             
             
               <div class="next-post">

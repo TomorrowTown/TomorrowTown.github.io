@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-16T17:02:21.812Z</updated>
+    <updated>2020-11-16T17:09:01.417Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -22,7 +22,7 @@
 <p>每个游戏都有一处代码块用来处理用户原始的输入，如：按钮点击、键盘事件、鼠标点击等。<br>
 它会记录输入并转换为游戏中的一个动作。<br>
 简单实现：</p>
-<pre><code class="language-C++">void InputHandler::handleInput()
+<pre><code class="language-cpp">void InputHandler::handleInput()
 {
     if (isPressed(BUTTON_X)) jump();
     else if (isPressed(BUTTON_Y)) fire();
@@ -34,7 +34,7 @@
 所以，为了支持自定义，我们需要把对jump()、fire()等方法的直接调用转换为<strong>可更换的</strong>东西。<br>
 因此我们需要使用对象来代表一个游戏动作。这就用到了命令模式。<br>
 首先，定义一个基类，代表一个可触发的游戏命令：</p>
-<pre><code class="language-C++">class Command
+<pre><code class="language-cpp">class Command
 {
 public:
     virtual ~Command() {}
@@ -42,7 +42,7 @@ public:
 };
 </code></pre>
 <p>然后为每一个不同的游戏动作创建一个子类：</p>
-<pre><code class="language-C++">class JumpCmd : public Command
+<pre><code class="language-cpp">class JumpCmd : public Command
 {
 public:
     virtual void execute() { jump(); }
@@ -56,7 +56,7 @@ class FireCmd : public Command
 /// #TODO: add more action subclass . . .
 </code></pre>
 <p>在输入处理中，为每个按钮存储一个指向命令的指针：</p>
-<pre><code class="language-C++">class InputHandler
+<pre><code class="language-cpp">class InputHandler
 {
 public:
     void handleInput();
@@ -71,7 +71,7 @@ private:
 };
 </code></pre>
 <p>现在对输入的处理便通过这些指针进行<strong>代理</strong>：</p>
-<pre><code class="language-C++">void InputHandler::handleInput()
+<pre><code class="language-cpp">void InputHandler::handleInput()
 {
     if (isPressed(BUTTON_X)) button_X-&gt;execute();
     else if (isPressed(BUTTON_Y) button_Y-&gt;execute();
@@ -82,7 +82,7 @@ private:
 <p>之前每个输入都会直接调用一个函数，现在则增加了一个间接调用层。</p>
 <h4 id="解耦角色和命令"><strong>解耦角色和命令</strong></h4>
 <p>在上例中，这些命令的使用范围很窄，只能作用于玩家对象。现在，让我们放宽限制，传入任何一个我们想要控制的对象，而不是让命令自身来确定所控制的对象：</p>
-<pre><code class="language-C++">class Command
+<pre><code class="language-cpp">class Command
 {
 public:
     virtual ~Command() {}
@@ -96,7 +96,7 @@ public:
 };
 </code></pre>
 <p>接下来修改输入处理方法，使其返回一个命令实例，以便调用具体的execute()：</p>
-<pre><code class="language-C++">Command* InputHandler::handleInput()
+<pre><code class="language-cpp">Command* InputHandler::handleInput()
 {
     if (isPressed(BUTTON_X)) return button_X;
     if (isPressed(BUTTON_Y)) return button_Y;
@@ -107,7 +107,7 @@ public:
 }
 </code></pre>
 <p>最终，对输入的处理转化为动作的映射代码如下：</p>
-<pre><code class="language-C++">Command* cmd = inputHandler.handleInput();
+<pre><code class="language-cpp">Command* cmd = inputHandler.handleInput();
 if (cmd) { cmd-&gt;execute(actor); }
 </code></pre>
 <h3 id="undoredo"><strong>undo&amp;redo</strong></h3>
@@ -115,7 +115,7 @@ if (cmd) { cmd-&gt;execute(actor); }
 与上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
 示例代码：<br>
 封装移动操作：</p>
-<pre><code class="language-C++">class MoveUnitCmd : public Command
+<pre><code class="language-cpp">class MoveUnitCmd : public Command
 {
 public:
     MoveUnitCmd(Unit* unit, int x, int y) : mUnit(uint), mX(x), mY(y) {}
@@ -128,7 +128,7 @@ private:
 };
 </code></pre>
 <p>之前的输入处理程序仅维护单一的命令对象，并在对应按钮被按下时调用其execute()方法。但这里，命令将更加具体，这意味着每次玩家选择一个动作，输入处理程序代码都会创建一个命令实例：</p>
-<pre><code class="language-C++">Command* handleInput()
+<pre><code class="language-cpp">Command* handleInput()
 {
     Unit* unit = getSelectedUnit();
 
@@ -148,7 +148,7 @@ private:
 }
 </code></pre>
 <p>Command类新增undo方法：</p>
-<pre><code class="language-C++">class Command
+<pre><code class="language-cpp">class Command
 {
 public:
     virtual ~Command() {}
@@ -157,7 +157,7 @@ public:
 }
 </code></pre>
 <p>进一步，修改上述子类，实现undo方法：</p>
-<pre><code class="language-C++">class MoveUnitCmd : public Command
+<pre><code class="language-cpp">class MoveUnitCmd : public Command
 {
 public:
     MoveUnitCmd(Unit* unit, int x, int y)
@@ -278,7 +278,7 @@ go func() {
 <p>In Go, array types are the basis of structures such as slices and string. Many operations obove of the array can be use directly for string or slice.</p>
 <blockquote>
 <p>References:<br>
-<a href="https://chai2010.cn/advanced-go-programming-book/">《Advanced Go Programming》</a></p>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
 </blockquote>
 ]]></content>
     </entry>
