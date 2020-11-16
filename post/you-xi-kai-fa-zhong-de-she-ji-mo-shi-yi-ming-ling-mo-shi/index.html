@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605546765218">
+<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605546870856">
 <link rel="stylesheet" href="https://TomorrowTown.github.io/styles/main.css">
 
 
@@ -34,7 +34,7 @@ void..." />
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://TomorrowTown.github.io">
-        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605546765218" class="site-logo">
+        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605546870856" class="site-logo">
         <h1 class="site-title">tomorrow</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -273,7 +273,7 @@ private:
 </code></pre>
 <p>更进一步，可以支持多次撤销。<br>
 具体思路是：不再只保存最后一个命令，而是维护一个命令列表和一个对当前命令的一个引用。当玩家执行了一个命令，就把该命令添加到这个列表，并将当前指针指向它。<br>
-当玩家选择undo时，我们撤销当前的命令并将当前指针移回去；当选择redo时，将当前指针移回去，然后从此处开始执行后续的命令。如果撤销之后选择了一个新命令，则列表中位于当前命令之后的所有命令都被舍弃掉。</p>
+当玩家选择undo时，我们撤销当前的命令并将当前指针移回去；当选择redo时，将当前指针移回去，然后从此处开始执行列表中的命令。如果撤销之后选择了一个新命令，则列表中位于当前命令之后的所有命令都被舍弃掉。</p>
 <blockquote>
 <p>References:<br>
 [1] Robert Nystrom. Game Programming Patterns[M]. 北京: 人民邮电出版社, 2016.</p>
