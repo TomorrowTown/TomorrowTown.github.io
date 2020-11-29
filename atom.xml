@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-29T13:06:06.814Z</updated>
+    <updated>2020-11-29T13:43:23.411Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -194,27 +194,27 @@ private:
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Go语言基础--array]]></title>
+        <title type="html"><![CDATA[Go语言基础(一)--array]]></title>
         <id>https://TomorrowTown.github.io/post/golang-basics-array/</id>
         <link href="https://TomorrowTown.github.io/post/golang-basics-array/">
         </link>
         <updated>2020-11-12T13:50:51.000Z</updated>
-        <content type="html"><![CDATA[<p>数组是一种固定长度的序列，可包含0个或多个元素。值得注意的是，<u>长度也是决定数组类型的因素。数组由不同长度或不同类型的数据组成，那么这些数组就是不同的类型，是不能直接赋值的</u>。对应于数组的类型是slice，slice是一种可以动态增长和收缩的序列，本章暂且不表。</p>
+        <content type="html"><![CDATA[<p>数组是一种固定长度的序列，可包含0个或多个元素。值得注意的是，<u>长度也是决定数组类型的因素。数组由不同长度或不同类型的数据组成，那么这些数组就是不同的类型，是不能直接赋值的</u>。因此在实际的golang项目中很少使用数组。对应于数组的类型是slice，slice是一种可以动态增长和收缩的序列，本章暂且不表。</p>
 <pre><code class="language-Go">var a [3]int                        // define an int-type array of length 3, all the elements are 0
 var b = [...]int{1, 2, 3}           // define an int-type array of length 3, elements are 1, 2, 3
 var c = [...]int{2: 3, 1: 2}        // define an int-type of length 3, elements are 0, 2, 3
 var d = [...]int{1, 2, 4: 5, 6}     // define an int-type of length 3, elements are 1, 2, 0, 0, 5, 6, 
 
 /*
-Pay attention to the 3rd and 4th ways to define an array.
-The 3rd way: The elements of the array are initialized by index, so the order in which the element's initialization values appear is arbitrary. This initialization method is similar to the initialization syntax of map [int]Type. The length of the array is based on the largest index that apppears, and elements that are not explicitly initialized are still initialized with a value of 0.
-The 4th way: Mixing the second and third initialization methods.
+值得注意的是第三种和第四种方法去定义一个数组。
+第三种方法：golang支持数组中的元素通过索引去初始化，因此初始化时不必按照索引从0开始递增的方式去初始化。数组的长度基于初始化时出现的最大索引，未显式初始化的元素仍然使用0值初始化。
+第四种方法：混合了第四种和第三种初始化方法。
 */
 </code></pre>
 <p><em>内存结构：</em><br>
 <img src="https://TomorrowTown.github.io/post-images/1605189729922.png" alt="" loading="lazy"></p>
-<p>Arrays in Go are value sementics. <u>An array variable represents the entire array. It is not an implicit pointer to the first element</u>(such as an array in C), but a complete value. When an array variable is assigned or passed, <u>the entire array is actually copied.</u><br>
-If the array is large, the assignment of the array will also have a large overhead. To avoid the overhead of copying an array, you can pass a pointer to the array, but <u>the array pointer is not an array.</u></p>
+<p>golang中的数组是<a href="https://www.jianshu.com/p/8ca5ef5867cc">值语义</a>的。<u>一个数组变量代表的是整个数组，不像C++，代表的是数组第一个元素的指针</u>。当一个数组被赋值或是被传递，整个数组其实是被拷贝的，修改拷贝的数组并不会改变原数组的数据，因为他们并不共享底层数据结构。<br>
+如果数组很大，那么数组分配也会有很大的开销。为了避免复制数组的开销，可以传递一个指向数组的指针，但数组指针不是数组。</p>
 <pre><code class="language-Go">var a = [...]int{1, 2, 3}
 var b = &amp;a
 
@@ -226,7 +226,7 @@ for i, v = range b {
     ......
 }
 </code></pre>
-<h2 id="common-ways-to-traverse-an-array">Common ways to traverse an array</h2>
+<h2 id="遍历数组的常用方法">遍历数组的常用方法</h2>
 <pre><code class="language-Go">for i := range a {
 }
 for i, v := range a {
@@ -234,9 +234,9 @@ for i, v := range a {
 for i := 0 ; i &lt; len(a); i++ {
 }
 </code></pre>
-<p>The performance of <strong>for range</strong> may be better, because this iteration can ensure that the array does not exceed the boundary, and the iteration of the array element can be omitted from the judgement of the subscript boundary.</p>
-<h2 id="more-uses-for-array">More uses for array</h2>
-<p>Array can be used not only for numeric types, but also string array, structure array, function array, interface array, pipe array, etc:</p>
+<p>需要注意的是，使用<strong>for range</strong>的方式进行遍历，其性能要比传统的**for i := 0 ; i &lt; len(a); i++ **要差很多。具体原因请查看：<a href="https://www.flysnow.org/2018/10/20/golang-for-range-slice-map.html">https://www.flysnow.org/2018/10/20/golang-for-range-slice-map.html</a></p>
+<h2 id="数组的其他用途">数组的其他用途</h2>
+<p>数组不仅可以用于数字类型，还可以是字符串数组，结构体数组，函数数组，接口数组，管道数组等等：</p>
 <pre><code class="language-Go">// string array
 var s1 = [...]string{&quot;hello&quot;, &quot;world&quot;}
 
@@ -254,12 +254,12 @@ var unknown = [...]interface{}{123, &quot;hello&quot;}
 // pipe array
 var chanList = [2]chan int{}
 </code></pre>
-<p>We can also define an empty array:</p>
+<p>也可以定义空数组：</p>
 <pre><code class="language-Go">var d = [0]int
 var e = [0]int{}
 var f = [...]int{}
 </code></pre>
-<p>An array of length 0 does not occupy space in memory. Although empty array is rarely used directly, they can be used to emphasize certain types of operations to avoid allocating additional memory space, such as for pipeline synchronization operations:</p>
+<p>长度为0的数组不占用内存空间。虽然空数组很少被使用，但它们可以用来强调某些类型的操作，以避免分配额外的内存空间，例如管道同步操作：</p>
 <pre><code class="language-Go">c1 := make(chan [0]int)
 go func() {
     fmt.Println(&quot;c1&quot;)
@@ -267,7 +267,8 @@ go func() {
 }()
 &lt;- c1
 </code></pre>
-<p>Here, we do not care about the actual type of data transmitted in the pipeline, where the pipeline receive and send operations are only used for message synchronization. For this scenario, we use an empty array as the pipeline type to reduce the overhead of pipeline element assignment. Of course, it is generally more preferred to use typeless anonymous structure instead.</p>
+<p>此处我们不关心管道中传输的实际数据类型，管道中的接收和发送操作仅用于消息同步。对于这个应用场景，我们使用一个空数组作为管道类型，以减少分配管道元素的开销。<br>
+当然，通常更倾向于使用无类型的匿名结构体以达到相同的目的：</p>
 <pre><code class="language-Go">c2 := make(chan struct{})
 go func() {
     fmt.Println(&quot;c2&quot;)
@@ -275,7 +276,7 @@ go func() {
 }()
 &lt;- c2
 </code></pre>
-<p>In Go, array types are the basis of structures such as slices and string. Many operations obove of the array can be use directly for string or slice.</p>
+<p>在golang中，数组是切片和字符串的基础结构。数组的许多操作都可直接用于切片和字符串。</p>
 <blockquote>
 <p>References:<br>
 <a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
