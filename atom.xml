@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-17T03:06:38.615Z</updated>
+    <updated>2020-11-29T13:06:06.814Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -194,12 +194,12 @@ private:
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Golang Basics--Array]]></title>
+        <title type="html"><![CDATA[Go语言基础--array]]></title>
         <id>https://TomorrowTown.github.io/post/golang-basics-array/</id>
         <link href="https://TomorrowTown.github.io/post/golang-basics-array/">
         </link>
         <updated>2020-11-12T13:50:51.000Z</updated>
-        <content type="html"><![CDATA[<p>Array is a sequence of fixed-lenth elements of a specific type, An array can consist of zero or more elements. The length of the array <u>is a part of array type,</u> array composed of different lengths or different types of data are diffenrent types, so arrays are rarely used directly in Go language(arrays of different lengths cannot be directly assigned because of different types). The type corresponding to the array is a slice, a slice is a sequence that can grow and shrink dynamically.</p>
+        <content type="html"><![CDATA[<p>数组是一种固定长度的序列，可包含0个或多个元素。值得注意的是，<u>长度也是决定数组类型的因素。数组由不同长度或不同类型的数据组成，那么这些数组就是不同的类型，是不能直接赋值的</u>。对应于数组的类型是slice，slice是一种可以动态增长和收缩的序列，本章暂且不表。</p>
 <pre><code class="language-Go">var a [3]int                        // define an int-type array of length 3, all the elements are 0
 var b = [...]int{1, 2, 3}           // define an int-type array of length 3, elements are 1, 2, 3
 var c = [...]int{2: 3, 1: 2}        // define an int-type of length 3, elements are 0, 2, 3
@@ -211,7 +211,7 @@ The 3rd way: The elements of the array are initialized by index, so the order in
 The 4th way: Mixing the second and third initialization methods.
 */
 </code></pre>
-<p><em>Memory structure:</em><br>
+<p><em>内存结构：</em><br>
 <img src="https://TomorrowTown.github.io/post-images/1605189729922.png" alt="" loading="lazy"></p>
 <p>Arrays in Go are value sementics. <u>An array variable represents the entire array. It is not an implicit pointer to the first element</u>(such as an array in C), but a complete value. When an array variable is assigned or passed, <u>the entire array is actually copied.</u><br>
 If the array is large, the assignment of the array will also have a large overhead. To avoid the overhead of copying an array, you can pass a pointer to the array, but <u>the array pointer is not an array.</u></p>

@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" >
 
-<title>Golang Basics--Array | tomorrow</title>
+<title>Go语言基础--array | tomorrow</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1605582392852">
+<link rel="shortcut icon" href="https://TomorrowTown.github.io/favicon.ico?v=1606655160007">
 <link rel="stylesheet" href="https://TomorrowTown.github.io/styles/main.css">
 
 
@@ -18,7 +18,7 @@
 
 
 
-    <meta name="description" content="Array is a sequence of fixed-lenth elements of a specific type, An array can consist of zero or more elements. The lengt..." />
+    <meta name="description" content="数组是一种固定长度的序列，可包含0个或多个元素。值得注意的是，长度也是决定数组类型的因素。数组由不同长度或不同类型的数据组成，那么这些数组就是不同的类型，是不能直接赋值的。对应于数组的类型是slice，slice是一种可以动态增长和收缩的序..." />
     <meta name="keywords" content="golang" />
   </head>
   <body>
@@ -28,7 +28,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://TomorrowTown.github.io">
-        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1605582392852" class="site-logo">
+        <img src="https://TomorrowTown.github.io/images/avatar.png?v=1606655160007" class="site-logo">
         <h1 class="site-title">tomorrow</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -90,14 +90,14 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">Golang Basics--Array</h2>
+            <h2 class="post-title">Go语言基础--array</h2>
             <div class="post-date">2020-11-12</div>
             
-              <div class="feature-container" style="background-image: url('https://TomorrowTown.github.io/post-images/golang-basics-array.jpeg')">
+              <div class="feature-container" style="background-image: url('https://TomorrowTown.github.io/post-images/golang-basics-array.png')">
               </div>
             
             <div class="post-content" v-pre>
-              <p>Array is a sequence of fixed-lenth elements of a specific type, An array can consist of zero or more elements. The length of the array <u>is a part of array type,</u> array composed of different lengths or different types of data are diffenrent types, so arrays are rarely used directly in Go language(arrays of different lengths cannot be directly assigned because of different types). The type corresponding to the array is a slice, a slice is a sequence that can grow and shrink dynamically.</p>
+              <p>数组是一种固定长度的序列，可包含0个或多个元素。值得注意的是，<u>长度也是决定数组类型的因素。数组由不同长度或不同类型的数据组成，那么这些数组就是不同的类型，是不能直接赋值的</u>。对应于数组的类型是slice，slice是一种可以动态增长和收缩的序列，本章暂且不表。</p>
 <pre><code class="language-Go">var a [3]int                        // define an int-type array of length 3, all the elements are 0
 var b = [...]int{1, 2, 3}           // define an int-type array of length 3, elements are 1, 2, 3
 var c = [...]int{2: 3, 1: 2}        // define an int-type of length 3, elements are 0, 2, 3
@@ -109,7 +109,7 @@ The 3rd way: The elements of the array are initialized by index, so the order in
 The 4th way: Mixing the second and third initialization methods.
 */
 </code></pre>
-<p><em>Memory structure:</em><br>
+<p><em>内存结构：</em><br>
 <img src="https://TomorrowTown.github.io/post-images/1605189729922.png" alt="" loading="lazy"></p>
 <p>Arrays in Go are value sementics. <u>An array variable represents the entire array. It is not an implicit pointer to the first element</u>(such as an array in C), but a complete value. When an array variable is assigned or passed, <u>the entire array is actually copied.</u><br>
 If the array is large, the assignment of the array will also have a large overhead. To avoid the overhead of copying an array, you can pass a pointer to the array, but <u>the array pointer is not an array.</u></p>
