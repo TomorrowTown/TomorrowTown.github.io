@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-11-29T14:10:06.585Z</updated>
+    <updated>2020-12-01T14:16:43.080Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -10,6 +10,29 @@
     <logo>https://TomorrowTown.github.io/images/avatar.png</logo>
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
+    <entry>
+        <title type="html"><![CDATA[Go语言并发编程模型(一) -- 开篇]]></title>
+        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/</id>
+        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/">
+        </link>
+        <updated>2020-11-29T15:17:26.000Z</updated>
+        <content type="html"><![CDATA[<p>在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
+常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。</p>
+<h2 id="go协程与系统线程">go协程与系统线程</h2>
+<p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
+<h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
+<p>go协程与系统线程的差别只是一个变量，但正是这个变量的区别导致了go并发编程的质的飞跃。<br>
+**系统级线程：**具有固定的栈大小(通常默认是2MB)，该栈主要用于在递归调用函数时保存参数和局部变量。固定栈大小会导致两个问题：一是对许多只需要少量栈空间的线程来说是一种巨大的浪费；二是需要大量栈空间的线程会面临栈溢出的风险。<br>
+**go协程：**goroutine以一个非常小的栈启动，栈大小不固定，可动态伸缩(最多为1GB)。因此启动成本非常小，所以可以启动成千上万个goroutine。</p>
+<h3 id="goroutine的调度器">goroutine的调度器</h3>
+<p>goroutine采用半抢占式的协作调度，只有在当前goroutine被阻塞时才会导致调度。同时，它发生在用户模式下。调度器会根据具体函数只保存必要的寄存器，切换成本远低于系统线程。运行时有一个<strong>runtime.GOMAXPROCS</strong>变量，用于控制当前运行正常非阻塞Goroutine的系统线程数。<br>
+关于goroutine的调度器的详细说明请参阅：&lt;(https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/&gt;</p>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Go语言基础(二) -- string]]></title>
         <id>https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/</id>
@@ -26,7 +49,7 @@ golang中的字符串底层数据结构为<strong>reflect.StringHeader：</stron
 </code></pre>
 <p>The string structure consisits of two pieces of information: the first is the underlying byte array pointed by the string, and the second is the length of the string in bytes. The string is actually a structure, so the assignment of the string is the copy process of the <strong>reflect.StringHeader</strong> structure, and does not involve the copy of the underlying byte array.<br>
 字符串结构包含两段信息：第一段是字符串所指向的底层字节数组；第二段是字符串的字节长度。字符串实际上是一个结构，所以字符串的赋值是 <strong>reflect.StringHeader</strong>结构的拷贝过程，修改赋值后的字符串并不会改变源字符串。<br>
-字符串&quot;Hello, World&quot; 对应的内存结构如图：<br>
+<em>字符串&quot;Hello, World&quot; 对应的内存结构如图：</em><br>
 <img src="https://TomorrowTown.github.io/post-images/1606658790160.png" alt="" loading="lazy"></p>
 <p>虽然字符串不是切片，但是也支持针对切片的操作：</p>
 <pre><code class="language-Go">s := &quot;hello, world&quot;

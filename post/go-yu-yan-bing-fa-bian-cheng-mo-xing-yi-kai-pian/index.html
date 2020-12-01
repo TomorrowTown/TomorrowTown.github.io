@@ -221,20 +221,18 @@
                                     
                                         <div class="thumbnail-shadow">
                                             <h1 class="post-title">
-                                                Go语言基础(二) -- string
+                                                Go语言并发编程模型(一) -- 开篇
                                             </h1>
                                             <div class="post-info">
                                                 <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/lXXd7xbfA/'">golang</span>
-                                                
                                                     </span>
                                                     <span class="post-view">
                                                     
                                                             </span>&nbsp;•&nbsp;
 
                                                             <span class="post-readtime">阅读时间:
-                                            1.4分</span>
+                                            2.0分</span>
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
@@ -246,24 +244,17 @@
                         <div class="post-main post-type-main">
                             <div class="post-content">
                                 <div class="post-content-real">
-                                    <p>与数组不同，字符串中的元素是不可修改的，字符串是一个<strong>只读</strong>字节数组。<u>虽然字符串的长度一旦固定就不可修改，但长度并不是字符串类型的一部分</u>。<br>
-由于Go的源码需要UTF8编码，所以出现在Go源码中的字符串常量通常是UTF8编码的。<br>
-golang中的字符串底层数据结构为<strong>reflect.StringHeader：</strong></p>
-<pre><code class="language-Go">type StringHeader struct {
-    Data uintptr
-    Len  int
-}
-</code></pre>
-<p>The string structure consisits of two pieces of information: the first is the underlying byte array pointed by the string, and the second is the length of the string in bytes. The string is actually a structure, so the assignment of the string is the copy process of the <strong>reflect.StringHeader</strong> structure, and does not involve the copy of the underlying byte array.<br>
-字符串结构包含两段信息：第一段是字符串所指向的底层字节数组；第二段是字符串的字节长度。字符串实际上是一个结构，所以字符串的赋值是 <strong>reflect.StringHeader</strong>结构的拷贝过程，修改赋值后的字符串并不会改变源字符串。<br>
-<em>字符串&quot;Hello, World&quot; 对应的内存结构如图：</em><br>
-<img src="https://TomorrowTown.github.io/post-images/1606658790160.png" alt="" loading="lazy"></p>
-<p>虽然字符串不是切片，但是也支持针对切片的操作：</p>
-<pre><code class="language-Go">s := &quot;hello, world&quot;
-hello := s[:5]
-world := s[7:]
-</code></pre>
-<p>字符串可以转换成<strong>byte[]</strong> 和 <strong>rune[]</strong>，且可使用<strong>for range</strong> 去遍历字符串。</p>
+                                    <p>在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
+常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。</p>
+<h2 id="go协程与系统线程">go协程与系统线程</h2>
+<p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
+<h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
+<p>go协程与系统线程的差别只是一个变量，但正是这个变量的区别导致了go并发编程的质的飞跃。<br>
+**系统级线程：**具有固定的栈大小(通常默认是2MB)，该栈主要用于在递归调用函数时保存参数和局部变量。固定栈大小会导致两个问题：一是对许多只需要少量栈空间的线程来说是一种巨大的浪费；二是需要大量栈空间的线程会面临栈溢出的风险。<br>
+**go协程：**goroutine以一个非常小的栈启动，栈大小不固定，可动态伸缩(最多为1GB)。因此启动成本非常小，所以可以启动成千上万个goroutine。</p>
+<h3 id="goroutine的调度器">goroutine的调度器</h3>
+<p>goroutine采用半抢占式的协作调度，只有在当前goroutine被阻塞时才会导致调度。同时，它发生在用户模式下。调度器会根据具体函数只保存必要的寄存器，切换成本远低于系统线程。运行时有一个<strong>runtime.GOMAXPROCS</strong>变量，用于控制当前运行正常非阻塞Goroutine的系统线程数。<br>
+关于goroutine的调度器的详细说明请参阅：&lt;(https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/&gt;</p>
 <blockquote>
 <p>References:<br>
 <a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
@@ -277,8 +268,8 @@ world := s[7:]
                             <div class="post-copyright">
                                 作者:
                                 tomorrow<br>永久链接:
-                                    <a href="https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/" title="Go语言基础(二) -- string">
-                                        https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/
+                                    <a href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/" title="Go语言并发编程模型(一) -- 开篇">
+                                        https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/
                                     </a><br> 协议: MIT License
                             </div>
                         </div>
@@ -301,17 +292,10 @@ world := s[7:]
                 </style>
                 <div class="lite-item nearby-article">
                     
-                        <div class="nearby-article-left" style="padding: 10px;">
-                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/">
-                                <i class="fa fa-chevron-left"></i>
-                                Go语言并发编程模型(一) -- 开篇
-                            </a>
-                        </div>
-                        
                             
                                 <div class="nearby-article-right" style="padding: 10px;">
-                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/">
-                                        游戏开发中的设计模式(一) -- 命令模式<i class="fa fa-chevron-right"></i>
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/">
+                                        Go语言基础(二) -- string<i class="fa fa-chevron-right"></i>
                                     </a>
                                 </div>
                                 
@@ -320,9 +304,9 @@ world := s[7:]
                 <span style="margin-right:15px">
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
-                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/&sharesource=qzone&title=Go语言基础(二) -- string&pics=https://TomorrowTown.github.io/images/avatar.png?v=1606832192099&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/&sharesource=weibo&title=Go语言基础(二) -- string + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1606832192099"><i class="fa fa-weibo "></i></a>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1606832192099&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1606832192099"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             
