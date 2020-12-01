@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-01T15:40:48.849Z</updated>
+    <updated>2020-12-01T15:41:35.137Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -16,7 +16,8 @@
         <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/">
         </link>
         <updated>2020-11-29T15:17:26.000Z</updated>
-        <content type="html"><![CDATA[<p>在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
+        <content type="html"><![CDATA[<p>TEST<br>
+在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
 常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。<br/><br>
 </br></p>
 <h2 id="go协程与系统线程">go协程与系统线程</h2>
