@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-06T09:47:16.045Z</updated>
+    <updated>2020-12-06T09:48:14.142Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -65,6 +65,7 @@ select{}    // empty pipeline selcetion statement, means that only the channel b
         <updated>2020-11-29T15:47:13.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
 <p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
+<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。<br>
 以下为一个顺序一致性内存模型：</p>
 <pre><code class="language-Go">var a string
 var done bool
@@ -87,7 +88,6 @@ func main() {
 }
 </code></pre>
 <p>由于goroutine和return事件是并发的，这两个事件谁都可能先发生，最终是否能打印出hello world也是无法确定的。<br>
-<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。<br>
 <br/><br>
 </br></p>
 <h2 id="使用同步原语进行同步">使用同步原语进行同步</h2>
