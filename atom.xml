@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-06T09:53:47.783Z</updated>
+    <updated>2020-12-06T10:11:21.924Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -52,6 +52,16 @@ func main() {
 }
 </code></pre>
 <p>上述程序允许的最大并发数为3。</p>
+<blockquote>
+<p><strong>Summary：</strong></p>
+<ul>
+<li>无缓冲channel：如果线程A向channel进行写操作，线程B尚未对该channel进行读操作，那么A线程将会被阻塞在写操作语句。相应的，如果线程A对一个线程进行读操作，线程B尚未对channel进行写操作，那么A线程将会阻塞在读操作语句。</li>
+<li>有缓冲channel：只有当该channel的len==cap时，即该channel满了时，向该channel再进行写操作的化，写操作语句就会被阻塞。如果该channel中无数据(即len=0)，那么读该channel的语句将会被阻塞。</li>
+<li>无缓冲channel：实现线程间同步。</li>
+<li>有缓冲channel：线程间是异步的。</li>
+<li>注意：如果对channel的读和写操作在同一个线程中进行，那么很容易造成读写互相等待，即死锁。</li>
+</ul>
+</blockquote>
 ]]></content>
     </entry>
     <entry>
