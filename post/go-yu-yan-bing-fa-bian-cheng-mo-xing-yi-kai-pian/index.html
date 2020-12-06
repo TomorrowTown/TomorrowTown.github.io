@@ -21,7 +21,7 @@
 <meta name="keywords" content="">
 <meta name="gridea-theme" content="Card">
 <meta name="spider" content="https://nmsl.sbjxw.网址">
-<meta name="UpdateTime" content="1607248177002">
+<meta name="UpdateTime" content="1607248425481">
 <script src="https://cdn.jsdelivr.net/gh/ITJoker233/ITJoker233.github.io/CDN/js/jquery@3.4.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
@@ -185,13 +185,13 @@
                     
             </ul>
         </nav>
-        <form id="gridea-search-form" class="searchform" data-update="1607248177002" action="/search/index.html">
+        <form id="gridea-search-form" class="searchform" data-update="1607248425481" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
     </div>
     <div id="mobile-menu">
-        <form id="gridea-search-form" class="mobile-searchform" data-update="1607248177002" action="/search/index.html">
+        <form id="gridea-search-form" class="mobile-searchform" data-update="1607248425481" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
@@ -261,7 +261,7 @@
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
-                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607248177002" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607248177002" class="avatar avatar-100 photo" width="100" height="100">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607248425481" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607248425481" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
                                             <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
                                         </div>
@@ -271,20 +271,16 @@
                                 <div class="post-content-real">
                                     <h2 id="0x00">0x00</h2>
 <p>在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
-常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。<br/><br>
-</br></p>
+常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。</p>
 <h2 id="go协程与系统线程">go协程与系统线程</h2>
-<p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。<br/><br>
-</br></p>
+<p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
 <h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
 <p>go协程与系统线程的差别只是一个变量，但正是这个变量的区别导致了go并发编程的质的飞跃。<br>
 **系统级线程：**具有固定的栈大小(通常默认是2MB)，该栈主要用于在递归调用函数时保存参数和局部变量。固定栈大小会导致两个问题：一是对许多只需要少量栈空间的线程来说是一种巨大的浪费；二是需要大量栈空间的线程会面临栈溢出的风险。<br>
-**go协程：**goroutine以一个非常小的栈启动，栈大小不固定，可动态伸缩(最多为1GB)。因此启动成本非常小，所以可以启动成千上万个goroutine。<br/><br>
-</br></p>
+**go协程：**goroutine以一个非常小的栈启动，栈大小不固定，可动态伸缩(最多为1GB)。因此启动成本非常小，所以可以启动成千上万个goroutine。</p>
 <h3 id="goroutine的调度器">goroutine的调度器</h3>
 <p>goroutine采用半抢占式的协作调度，只有在当前goroutine被阻塞时才会导致调度。同时，它发生在用户模式下。调度器会根据具体函数只保存必要的寄存器，切换成本远低于系统线程。运行时有一个<strong>runtime.GOMAXPROCS</strong>变量，用于控制当前运行正常非阻塞Goroutine的系统线程数。<br>
-关于goroutine的调度器的详细说明请参阅：&lt;(https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/&gt;  <br/><br>
-</br></p>
+关于goroutine的调度器的详细说明请参阅：&lt;(https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/&gt;</p>
 <blockquote>
 <p>References:<br>
 <a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
@@ -342,8 +338,8 @@
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
                 <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607248177002&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607248177002"><i class="fa fa-weibo "></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607248425481&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607248425481"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             
