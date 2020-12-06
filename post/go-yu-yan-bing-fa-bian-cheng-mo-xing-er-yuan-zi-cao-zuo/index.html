@@ -21,7 +21,7 @@
 <meta name="keywords" content="">
 <meta name="gridea-theme" content="Card">
 <meta name="spider" content="https://nmsl.sbjxw.网址">
-<meta name="UpdateTime" content="1607246891550">
+<meta name="UpdateTime" content="1607248026042">
 <script src="https://cdn.jsdelivr.net/gh/ITJoker233/ITJoker233.github.io/CDN/js/jquery@3.4.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
@@ -185,13 +185,13 @@
                     
             </ul>
         </nav>
-        <form id="gridea-search-form" class="searchform" data-update="1607246891550" action="/search/index.html">
+        <form id="gridea-search-form" class="searchform" data-update="1607248026042" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
     </div>
     <div id="mobile-menu">
-        <form id="gridea-search-form" class="mobile-searchform" data-update="1607246891550" action="/search/index.html">
+        <form id="gridea-search-form" class="mobile-searchform" data-update="1607248026042" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
@@ -255,11 +255,11 @@
                                                             </span>&nbsp;•&nbsp;
 
                                                             <span class="post-readtime">阅读时间:
-                                            3.1分</span>
+                                            3.2分</span>
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
-                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607246891550" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607246891550" class="avatar avatar-100 photo" width="100" height="100">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607248026042" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607248026042" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
                                             <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
                                         </div>
@@ -300,38 +300,39 @@ func main() {
     fmt.Println(total.value)    // 10100
 }
 </code></pre>
-<h2 id="使用syncatomic实现原子操作">使用sync/atomic实现原子操作</h2>
-<p>如上，使用互斥锁去保护数字共享资源既麻烦又低效。标准库中的<strong>sync/atomic</strong>包对此提供了丰富的支持。利用此包重新实现上面的例子：</p>
-<pre><code class="language-Go">package main
-
-import (
-    &quot;sync&quot;
-    &quot;sync/atomic&quot;
-    &quot;fmt&quot;
-)
-
-var total uint64
-
-func worker(wg *sync.WaitGroup) {
-    defer wg.Done()
-    for i := 0; i &lt;= 100; i++ {
-        atomic.AddUnit64(&amp;total, i)
-    }
-}
-
-func main() {
-    var wg sync.WaitGroup
-    wg.Add(2)
-    go worker(&amp;wg)
-    go worker(&amp;wg)
-    wg.Wait()
-
-    fmt.Println(total.value)    // 10100
-}
+<br/>
+</br>
+## 使用sync/atomic实现原子操作
+如上，使用互斥锁去保护数字共享资源既麻烦又低效。标准库中的**sync/atomic**包对此提供了丰富的支持。利用此包重新实现上面的例子：
+```Go
+package main
+<p>import (<br>
+&quot;sync&quot;<br>
+&quot;sync/atomic&quot;<br>
+&quot;fmt&quot;<br>
+)</p>
+<p>var total uint64</p>
+<p>func worker(wg *sync.WaitGroup) {<br>
+defer wg.Done()<br>
+for i := 0; i &lt;= 100; i++ {<br>
+atomic.AddUnit64(&amp;total, i)<br>
+}<br>
+}</p>
+<p>func main() {<br>
+var wg sync.WaitGroup<br>
+wg.Add(2)<br>
+go worker(&amp;wg)<br>
+go worker(&amp;wg)<br>
+wg.Wait()</p>
+<pre><code>fmt.Println(total.value)    // 10100
 </code></pre>
-<h2 id="利用原子操作和互斥锁实现单例">利用原子操作和互斥锁实现单例</h2>
-<p>原子操作和互斥锁可以实现非常高效的单例模式。互斥锁的开销比普通整数的原子读写要高得多。 在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。</p>
-<pre><code class="language-Go">type singleton struct {}
+<p>}</p>
+<pre><code>&lt;br/&gt;
+&lt;/br&gt;
+## 利用原子操作和互斥锁实现单例
+原子操作和互斥锁可以实现非常高效的单例模式。互斥锁的开销比普通整数的原子读写要高得多。 在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。
+```Go
+type singleton struct {}
 
 var (
     instance    *singleton
@@ -387,37 +388,33 @@ func GetInst() *singleton {
     return instance
 }
 </code></pre>
-<h2 id="load-store">Load &amp; Store</h2>
-<p><strong>atomic.Value</strong>对象提供了<strong>Load</strong>和<strong>Store</strong>两种方法，用于加载和保存数据。其返回值和参数均为**interface{}**类型，所以这两种方法可以用于自定义的任何复杂结构。</p>
-<pre><code class="language-Go">/* This is a simplified producer-consumer model: back-end thread generate the latest configuration; multiple worker threads in the front-end get the latest configuration. All threads share configuration resources. */
-
-// save the current configuration
-var conf atomic.Value
-
-// initialize the configuration
-conf.Store(loadConfig())
-
-// start a backend thread, load the updated configuration
-go func() {
-    for {
-        time.Sleep(time.Second)
-        conf.Store(loadConfig())
-    }
-}
-
-// the worker threads used to process requests, always use the latest configuration
-for i := 0; i &lt; 10; i++ {
-    go func() {
-        for r := range requests() {
-            c := conf.Load()
-        }
-    }()
-}
-</code></pre>
-<blockquote>
-<p>References:<br>
-<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
-</blockquote>
+<br/>
+</br>
+## Load & Store
+**atomic.Value**对象提供了**Load**和**Store**两种方法，用于加载和保存数据。其返回值和参数均为**interface{}**类型，所以这两种方法可以用于自定义的任何复杂结构。
+```Go
+/* This is a simplified producer-consumer model: back-end thread generate the latest configuration; multiple worker threads in the front-end get the latest configuration. All threads share configuration resources. */
+<p>// save the current configuration<br>
+var conf atomic.Value</p>
+<p>// initialize the configuration<br>
+conf.Store(loadConfig())</p>
+<p>// start a backend thread, load the updated configuration<br>
+go func() {<br>
+for {<br>
+time.Sleep(time.Second)<br>
+conf.Store(loadConfig())<br>
+}<br>
+}</p>
+<p>// the worker threads used to process requests, always use the latest configuration<br>
+for i := 0; i &lt; 10; i++ {<br>
+go func() {<br>
+for r := range requests() {<br>
+c := conf.Load()<br>
+}<br>
+}()<br>
+}</p>
+<pre><code>&gt; References:
+&gt; [Advanced Go Programming](https://chai2010.cn/advanced-go-programming-book/)</code></pre>
 
                                 </div>
                             </div>
@@ -471,8 +468,8 @@ for i := 0; i &lt; 10; i++ {
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
                 <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/&sharesource=qzone&title=Go语言并发编程模型(二) -- 原子操作&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607246891550&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/&sharesource=weibo&title=Go语言并发编程模型(二) -- 原子操作 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607246891550"><i class="fa fa-weibo "></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/&sharesource=qzone&title=Go语言并发编程模型(二) -- 原子操作&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607248026042&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/&sharesource=weibo&title=Go语言并发编程模型(二) -- 原子操作 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607248026042"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             

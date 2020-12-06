@@ -21,7 +21,7 @@
 <meta name="keywords" content="">
 <meta name="gridea-theme" content="Card">
 <meta name="spider" content="https://nmsl.sbjxw.网址">
-<meta name="UpdateTime" content="1607246891550">
+<meta name="UpdateTime" content="1607248026042">
 <script src="https://cdn.jsdelivr.net/gh/ITJoker233/ITJoker233.github.io/CDN/js/jquery@3.4.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
@@ -185,13 +185,13 @@
                     
             </ul>
         </nav>
-        <form id="gridea-search-form" class="searchform" data-update="1607246891550" action="/search/index.html">
+        <form id="gridea-search-form" class="searchform" data-update="1607248026042" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
     </div>
     <div id="mobile-menu">
-        <form id="gridea-search-form" class="mobile-searchform" data-update="1607246891550" action="/search/index.html">
+        <form id="gridea-search-form" class="mobile-searchform" data-update="1607248026042" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
@@ -259,7 +259,7 @@
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
-                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607246891550" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607246891550" class="avatar avatar-100 photo" width="100" height="100">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607248026042" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607248026042" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
                                             <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
                                         </div>
@@ -267,7 +267,8 @@
                         <div class="post-main post-type-main">
                             <div class="post-content">
                                 <div class="post-content-real">
-                                    <p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
+                                    <h2 id="0x00">0x00</h2>
+<p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
 以下为一个顺序一致性内存模型：</p>
 <pre><code class="language-Go">var a string
 var done bool
@@ -290,7 +291,9 @@ func main() {
 }
 </code></pre>
 <p>由于goroutine和return事件是并发的，这两个事件谁都可能先发生，最终是否能打印出hello world也是无法确定的。<br>
-<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。</p>
+<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。<br>
+<br/><br>
+</br></p>
 <h2 id="使用同步原语进行同步">使用同步原语进行同步</h2>
 <pre><code class="language-Go">func main() {
     done := make(chan int)
@@ -304,7 +307,9 @@ func main() {
 </code></pre>
 <p>done &lt;- 1：向channel传值；&lt;- done：从channel取值。<br>
 <u>向channel传值取值先写谁都无所谓，因为传了没人取，和想取没人传，都会使channel阻塞</u>，<br>
-因此同步语句2能够顺利执行(不阻塞)，就意味着同步语句1肯定执行了，又因为在一个goroutine中总能保证顺序一致性内存，因此在语句1执行之前，&quot;111&quot;肯定打印了，因此总能保证先打印&quot;111&quot;，再打印&quot;222&quot;。</p>
+因此同步语句2能够顺利执行(不阻塞)，就意味着同步语句1肯定执行了，又因为在一个goroutine中总能保证顺序一致性内存，因此在语句1执行之前，&quot;111&quot;肯定打印了，因此总能保证先打印&quot;111&quot;，再打印&quot;222&quot;。<br>
+<br/><br>
+</br></p>
 <h2 id="使用互斥量实现同步">使用互斥量实现同步</h2>
 <pre><code class="language-Go">func main() {
     var mu sync.Mutex
@@ -355,6 +360,13 @@ func main() {
                 </style>
                 <div class="lite-item nearby-article">
                     
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-si-ji-yu-guan-dao-de-tong-xin/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(四) -- 基于管道的通信
+                            </a>
+                        </div>
+                        
                             
                                 <div class="nearby-article-right" style="padding: 10px;">
                                     <a class="next" rel="next" href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/">
@@ -368,8 +380,8 @@ func main() {
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
                 <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/&sharesource=qzone&title=Go语言并发编程模型(三) -- 顺序一致性内存模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607246891550&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/&sharesource=weibo&title=Go语言并发编程模型(三) -- 顺序一致性内存模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607246891550"><i class="fa fa-weibo "></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/&sharesource=qzone&title=Go语言并发编程模型(三) -- 顺序一致性内存模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607248026042&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/&sharesource=weibo&title=Go语言并发编程模型(三) -- 顺序一致性内存模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607248026042"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             

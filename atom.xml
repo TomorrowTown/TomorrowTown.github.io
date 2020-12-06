@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-06T09:28:22.033Z</updated>
+    <updated>2020-12-06T09:47:07.940Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -11,12 +11,60 @@
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
     <entry>
+        <title type="html"><![CDATA[Go语言并发编程模型(四) -- 基于管道的通信]]></title>
+        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-si-ji-yu-guan-dao-de-tong-xin/</id>
+        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-si-ji-yu-guan-dao-de-tong-xin/">
+        </link>
+        <updated>2020-11-29T15:47:37.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
+<p>依靠channel通信是不同goroutine之间同步的主要方法。<br>
+<br/><br>
+</br></p>
+<h2 id="无缓冲channel">无缓冲channel</h2>
+<p>对于无缓冲channel而言，每一个发送操作(<strong>chan &lt;- x</strong>)都对应一个接收操作(<strong>&lt;- chan</strong>)，反之亦然。channel的发送和接收操作通常出现在不同的goroutine之间，如果放到同一个goroutine，则很容易出现死锁问题。<br>
+使用示例：</p>
+<pre><code class="language-Go">var done = make(chan bool)     // define an unbuffered channel, its len and cap always equal to 0
+var msg string
+
+func aGoroutine() {
+    msg = &quot;hello world&quot;
+    done &lt;- x   // sending operation, send a synchronization signal to channel
+    // or use close(done) to replace done &lt;- false
+}
+
+func main() {
+    go aGoroutine()
+    &lt;- done     // receiving operation, receive the corresponding synchronization signal
+    fmt.println(msg)
+}
+</code></pre>
+<br/>
+</br>
+## 有缓冲channel
+通过有缓冲channel的buffer大小，我们可以控制并发执行的goroutine的最大数量。例：
+```Go
+var limit = make(chan int, 3)   // the channel with cache, length can be 0, 1, 2 or 3, capacity equals to 3
+<p>func main() {<br>
+for _, w := range workerThread {<br>
+go func() {<br>
+limit &lt;- 1<br>
+w()<br>
+&lt;- limit<br>
+}()<br>
+select{}    // empty pipeline selcetion statement, means that only the channel be nil, the main thread can excute return<br>
+}<br>
+}</p>
+<pre><code>上述程序允许的最大并发数为3。</code></pre>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(三) -- 顺序一致性内存模型]]></title>
         <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/</id>
         <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/">
         </link>
         <updated>2020-11-29T15:47:13.000Z</updated>
-        <content type="html"><![CDATA[<p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
+        <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
+<p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
 以下为一个顺序一致性内存模型：</p>
 <pre><code class="language-Go">var a string
 var done bool
@@ -39,7 +87,9 @@ func main() {
 }
 </code></pre>
 <p>由于goroutine和return事件是并发的，这两个事件谁都可能先发生，最终是否能打印出hello world也是无法确定的。<br>
-<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。</p>
+<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。<br>
+<br/><br>
+</br></p>
 <h2 id="使用同步原语进行同步">使用同步原语进行同步</h2>
 <pre><code class="language-Go">func main() {
     done := make(chan int)
@@ -53,7 +103,9 @@ func main() {
 </code></pre>
 <p>done &lt;- 1：向channel传值；&lt;- done：从channel取值。<br>
 <u>向channel传值取值先写谁都无所谓，因为传了没人取，和想取没人传，都会使channel阻塞</u>，<br>
-因此同步语句2能够顺利执行(不阻塞)，就意味着同步语句1肯定执行了，又因为在一个goroutine中总能保证顺序一致性内存，因此在语句1执行之前，&quot;111&quot;肯定打印了，因此总能保证先打印&quot;111&quot;，再打印&quot;222&quot;。</p>
+因此同步语句2能够顺利执行(不阻塞)，就意味着同步语句1肯定执行了，又因为在一个goroutine中总能保证顺序一致性内存，因此在语句1执行之前，&quot;111&quot;肯定打印了，因此总能保证先打印&quot;111&quot;，再打印&quot;222&quot;。<br>
+<br/><br>
+</br></p>
 <h2 id="使用互斥量实现同步">使用互斥量实现同步</h2>
 <pre><code class="language-Go">func main() {
     var mu sync.Mutex
@@ -112,38 +164,39 @@ func main() {
     fmt.Println(total.value)    // 10100
 }
 </code></pre>
-<h2 id="使用syncatomic实现原子操作">使用sync/atomic实现原子操作</h2>
-<p>如上，使用互斥锁去保护数字共享资源既麻烦又低效。标准库中的<strong>sync/atomic</strong>包对此提供了丰富的支持。利用此包重新实现上面的例子：</p>
-<pre><code class="language-Go">package main
-
-import (
-    &quot;sync&quot;
-    &quot;sync/atomic&quot;
-    &quot;fmt&quot;
-)
-
-var total uint64
-
-func worker(wg *sync.WaitGroup) {
-    defer wg.Done()
-    for i := 0; i &lt;= 100; i++ {
-        atomic.AddUnit64(&amp;total, i)
-    }
-}
-
-func main() {
-    var wg sync.WaitGroup
-    wg.Add(2)
-    go worker(&amp;wg)
-    go worker(&amp;wg)
-    wg.Wait()
-
-    fmt.Println(total.value)    // 10100
-}
+<br/>
+</br>
+## 使用sync/atomic实现原子操作
+如上，使用互斥锁去保护数字共享资源既麻烦又低效。标准库中的**sync/atomic**包对此提供了丰富的支持。利用此包重新实现上面的例子：
+```Go
+package main
+<p>import (<br>
+&quot;sync&quot;<br>
+&quot;sync/atomic&quot;<br>
+&quot;fmt&quot;<br>
+)</p>
+<p>var total uint64</p>
+<p>func worker(wg *sync.WaitGroup) {<br>
+defer wg.Done()<br>
+for i := 0; i &lt;= 100; i++ {<br>
+atomic.AddUnit64(&amp;total, i)<br>
+}<br>
+}</p>
+<p>func main() {<br>
+var wg sync.WaitGroup<br>
+wg.Add(2)<br>
+go worker(&amp;wg)<br>
+go worker(&amp;wg)<br>
+wg.Wait()</p>
+<pre><code>fmt.Println(total.value)    // 10100
 </code></pre>
-<h2 id="利用原子操作和互斥锁实现单例">利用原子操作和互斥锁实现单例</h2>
-<p>原子操作和互斥锁可以实现非常高效的单例模式。互斥锁的开销比普通整数的原子读写要高得多。 在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。</p>
-<pre><code class="language-Go">type singleton struct {}
+<p>}</p>
+<pre><code>&lt;br/&gt;
+&lt;/br&gt;
+## 利用原子操作和互斥锁实现单例
+原子操作和互斥锁可以实现非常高效的单例模式。互斥锁的开销比普通整数的原子读写要高得多。 在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。
+```Go
+type singleton struct {}
 
 var (
     instance    *singleton
@@ -199,37 +252,33 @@ func GetInst() *singleton {
     return instance
 }
 </code></pre>
-<h2 id="load-store">Load &amp; Store</h2>
-<p><strong>atomic.Value</strong>对象提供了<strong>Load</strong>和<strong>Store</strong>两种方法，用于加载和保存数据。其返回值和参数均为**interface{}**类型，所以这两种方法可以用于自定义的任何复杂结构。</p>
-<pre><code class="language-Go">/* This is a simplified producer-consumer model: back-end thread generate the latest configuration; multiple worker threads in the front-end get the latest configuration. All threads share configuration resources. */
-
-// save the current configuration
-var conf atomic.Value
-
-// initialize the configuration
-conf.Store(loadConfig())
-
-// start a backend thread, load the updated configuration
-go func() {
-    for {
-        time.Sleep(time.Second)
-        conf.Store(loadConfig())
-    }
-}
-
-// the worker threads used to process requests, always use the latest configuration
-for i := 0; i &lt; 10; i++ {
-    go func() {
-        for r := range requests() {
-            c := conf.Load()
-        }
-    }()
-}
-</code></pre>
-<blockquote>
-<p>References:<br>
-<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
-</blockquote>
+<br/>
+</br>
+## Load & Store
+**atomic.Value**对象提供了**Load**和**Store**两种方法，用于加载和保存数据。其返回值和参数均为**interface{}**类型，所以这两种方法可以用于自定义的任何复杂结构。
+```Go
+/* This is a simplified producer-consumer model: back-end thread generate the latest configuration; multiple worker threads in the front-end get the latest configuration. All threads share configuration resources. */
+<p>// save the current configuration<br>
+var conf atomic.Value</p>
+<p>// initialize the configuration<br>
+conf.Store(loadConfig())</p>
+<p>// start a backend thread, load the updated configuration<br>
+go func() {<br>
+for {<br>
+time.Sleep(time.Second)<br>
+conf.Store(loadConfig())<br>
+}<br>
+}</p>
+<p>// the worker threads used to process requests, always use the latest configuration<br>
+for i := 0; i &lt; 10; i++ {<br>
+go func() {<br>
+for r := range requests() {<br>
+c := conf.Load()<br>
+}<br>
+}()<br>
+}</p>
+<pre><code>&gt; References:
+&gt; [Advanced Go Programming](https://chai2010.cn/advanced-go-programming-book/)</code></pre>
 ]]></content>
     </entry>
     <entry>
