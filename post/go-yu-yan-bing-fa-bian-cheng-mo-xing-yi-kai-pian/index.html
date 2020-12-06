@@ -21,7 +21,7 @@
 <meta name="keywords" content="">
 <meta name="gridea-theme" content="Card">
 <meta name="spider" content="https://nmsl.sbjxw.网址">
-<meta name="UpdateTime" content="1607249478433">
+<meta name="UpdateTime" content="1607269708528">
 <script src="https://cdn.jsdelivr.net/gh/ITJoker233/ITJoker233.github.io/CDN/js/jquery@3.4.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
@@ -185,13 +185,13 @@
                     
             </ul>
         </nav>
-        <form id="gridea-search-form" class="searchform" data-update="1607249478433" action="/search/index.html">
+        <form id="gridea-search-form" class="searchform" data-update="1607269708528" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
     </div>
     <div id="mobile-menu">
-        <form id="gridea-search-form" class="mobile-searchform" data-update="1607249478433" action="/search/index.html">
+        <form id="gridea-search-form" class="mobile-searchform" data-update="1607269708528" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
@@ -257,11 +257,11 @@
                                                             </span>&nbsp;•&nbsp;
 
                                                             <span class="post-readtime">阅读时间:
-                                            2.0分</span>
+                                            2.7分</span>
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
-                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607249478433" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607249478433" class="avatar avatar-100 photo" width="100" height="100">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607269708528" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607269708528" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
                                             <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
                                         </div>
@@ -270,8 +270,16 @@
                             <div class="post-content">
                                 <div class="post-content-real">
                                     <h2 id="0x00">0x00</h2>
-<p>在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
-常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。</p>
+<p>首先看一下并发与并行的区别：<br>
+并发：注意力更多地集中于设计层面，并发程序能够被顺序执行；<br>
+并行：注意力更多地集中于运行层面，并发程序一般是大量简单重复的运算。<br>
+在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
+在并发编程中，对资源的精确访问需要精确的控制。在大多数语言中，这个困难的问题是通过锁和其他同步解决方案来解决的。但在golang中有另一种方式，它将共享的值通过channel传递。在任何时刻，最好只有一个goroutine可以拥有该资源。数据竞争在设计层面被消除。<br>
+常用的并发编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。<br>
+Golang并发编程的slogan：</p>
+<blockquote>
+<p>Do not communicate by sharing memory; instead, share memory by communicating.</p>
+</blockquote>
 <h2 id="go协程与系统线程">go协程与系统线程</h2>
 <p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
 <h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
@@ -338,8 +346,8 @@
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
                 <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607249478433&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607249478433"><i class="fa fa-weibo "></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607269708528&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607269708528"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             

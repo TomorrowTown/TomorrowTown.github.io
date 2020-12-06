@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-06T10:11:21.924Z</updated>
+    <updated>2020-12-06T15:48:31.144Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -294,8 +294,16 @@ for i := 0; i &lt; 10; i++ {
         </link>
         <updated>2020-11-29T15:17:26.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
-<p>在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
-常用的并行编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。</p>
+<p>首先看一下并发与并行的区别：<br>
+并发：注意力更多地集中于设计层面，并发程序能够被顺序执行；<br>
+并行：注意力更多地集中于运行层面，并发程序一般是大量简单重复的运算。<br>
+在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
+在并发编程中，对资源的精确访问需要精确的控制。在大多数语言中，这个困难的问题是通过锁和其他同步解决方案来解决的。但在golang中有另一种方式，它将共享的值通过channel传递。在任何时刻，最好只有一个goroutine可以拥有该资源。数据竞争在设计层面被消除。<br>
+常用的并发编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。<br>
+Golang并发编程的slogan：</p>
+<blockquote>
+<p>Do not communicate by sharing memory; instead, share memory by communicating.</p>
+</blockquote>
 <h2 id="go协程与系统线程">go协程与系统线程</h2>
 <p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
 <h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
@@ -633,7 +641,7 @@ go func() {
 </code></pre>
 <p>这样，默认访问地址为localhost:9999。</p>
 <blockquote>
-<p>无论是否是http服务, 都可以引入**&quot;net/http/pprof&quot;**作为性能分析的工具。</p>
+<p>无论是否是http服务, 都可以引入<strong>net/http/pprof</strong>作为性能分析的工具。</p>
 </blockquote>
 <h2 id="go-torch和flamegraph">go-torch和FlameGraph</h2>
 <ol>
@@ -644,7 +652,7 @@ cd $GOPATH/src/github.com/uber/go-torch
 git clone https://github.com/brendangregg/FlameGraph.git
 sudo cp ./FlameGraph/flamegraph.pl /usr/local/bin
 </code></pre>
-<p>NOTE: go get到的项目默认会放到用户目录下的go文件夹，以此作为该项目的GOPATH。</p>
+<p>**NOTE: **go get到的项目默认会放到用户目录下的go文件夹，以此作为该项目的GOPATH。</p>
 <blockquote>
 <p>可能遇到的问题:<br>
 go get github.com/uber/go-torch时，有可能出现：</p>
