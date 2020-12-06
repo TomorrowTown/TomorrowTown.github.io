@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-06T15:48:47.165Z</updated>
+    <updated>2020-12-06T16:09:57.874Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -10,6 +10,50 @@
     <logo>https://TomorrowTown.github.io/images/avatar.png</logo>
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
+    <entry>
+        <title type="html"><![CDATA[Go语言并发编程模型(七) -- 生产者消费者模型]]></title>
+        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-qi-sheng-chan-zhe-xiao-fei-zhe-mo-xing/</id>
+        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-qi-sheng-chan-zhe-xiao-fei-zhe-mo-xing/">
+        </link>
+        <updated>2020-11-29T15:51:39.000Z</updated>
+        <content type="html"><![CDATA[<p><strong>talk is cheap, show you the code:</strong></p>
+<pre><code class="language-Go">// producer: generate a sequence of multiples of factor
+func Producer(factor int, out chan &lt;- int) {
+    for i := 0; ; i++ {
+        out &lt;- i * factor
+    }
+} 
+
+// consumer
+func Consumer(in &lt;- chan int) {
+    for v := range in {
+        fmt.Println(v)
+    }
+}
+
+func main() {
+    ch := make(chan int, 64)    // result queue
+
+    // the producers below are concurrency, therefore, the order of the result sequence output by the consumer is uncertain
+    go Producer(3, ch)  // generate a sequence of multiples of 3, and put them into the ch
+     go Producer(5, ch)  // generate a sequence of multiples of 5, and put them into the ch
+      go Consumer(ch)  // consume the generated sequence
+
+      // exit after a certain time, let producers and consumers work for a certain time
+      // time.Sleep(time.Second * 5)
+
+      /*
+      * but the above sleep mode cannot guarantee stable output,
+      * so we can let the main function save the blocked state without exiting,
+      * and only exit the program when the user enters &quot;Ctrl C&quot;
+      /*
+      sig := make(chan os.Signal, 1)
+      signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+      fmt.Println(&quot;quit (%v)\n&quot;, &lt;- sig)
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(四) -- 基于管道的通信]]></title>
         <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-si-ji-yu-guan-dao-de-tong-xin/</id>
