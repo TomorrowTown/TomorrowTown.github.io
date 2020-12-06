@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-06T09:48:14.142Z</updated>
+    <updated>2020-12-06T09:49:38.868Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -38,23 +38,22 @@ func main() {
     fmt.println(msg)
 }
 </code></pre>
-<br/>
-</br>
-## 有缓冲channel
-通过有缓冲channel的buffer大小，我们可以控制并发执行的goroutine的最大数量。例：
-```Go
-var limit = make(chan int, 3)   // the channel with cache, length can be 0, 1, 2 or 3, capacity equals to 3
-<p>func main() {<br>
-for _, w := range workerThread {<br>
-go func() {<br>
-limit &lt;- 1<br>
-w()<br>
-&lt;- limit<br>
-}()<br>
-select{}    // empty pipeline selcetion statement, means that only the channel be nil, the main thread can excute return<br>
-}<br>
-}</p>
-<pre><code>上述程序允许的最大并发数为3。</code></pre>
+<h2 id="有缓冲channel">有缓冲channel</h2>
+<p>通过有缓冲channel的buffer大小，我们可以控制并发执行的goroutine的最大数量。例：</p>
+<pre><code class="language-Go">var limit = make(chan int, 3)   // the channel with cache, length can be 0, 1, 2 or 3, capacity equals to 3
+
+func main() {
+    for _, w := range workerThread {
+        go func() {
+            limit &lt;- 1
+            w()
+            &lt;- limit
+        }()
+        select{}    // empty pipeline selcetion statement, means that only the channel be nil, the main thread can excute return
+    }
+}
+</code></pre>
+<p>上述程序允许的最大并发数为3。</p>
 ]]></content>
     </entry>
     <entry>
