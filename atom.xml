@@ -2,11 +2,11 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-07T02:45:02.027Z</updated>
+    <updated>2020-12-07T02:46:47.581Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
-    <subtitle>Remember to look up at the stars and not on your feet.</subtitle>
+    <subtitle>&quot;我猪肉佬何尝不想当一个伟大的舞蹈家&quot;</subtitle>
     <logo>https://TomorrowTown.github.io/images/avatar.png</logo>
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
