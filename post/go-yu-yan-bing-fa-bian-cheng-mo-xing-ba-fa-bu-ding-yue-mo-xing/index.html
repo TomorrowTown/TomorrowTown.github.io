@@ -21,7 +21,7 @@
 <meta name="keywords" content="">
 <meta name="gridea-theme" content="Card">
 <meta name="spider" content="https://nmsl.sbjxw.网址">
-<meta name="UpdateTime" content="1607351241742">
+<meta name="UpdateTime" content="1607351697128">
 <script src="https://cdn.jsdelivr.net/gh/ITJoker233/ITJoker233.github.io/CDN/js/jquery@3.4.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
@@ -185,13 +185,13 @@
                     
             </ul>
         </nav>
-        <form id="gridea-search-form" class="searchform" data-update="1607351241742" action="/search/index.html">
+        <form id="gridea-search-form" class="searchform" data-update="1607351697128" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
     </div>
     <div id="mobile-menu">
-        <form id="gridea-search-form" class="mobile-searchform" data-update="1607351241742" action="/search/index.html">
+        <form id="gridea-search-form" class="mobile-searchform" data-update="1607351697128" action="/search/index.html">
             <i class="Card Card-search"></i>
             <input id="s" class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
         </form>
@@ -259,7 +259,7 @@
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
-                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607351241742" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607351241742" class="avatar avatar-100 photo" width="100" height="100">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607351697128" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607351697128" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
                                             <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
                                         </div>
@@ -275,126 +275,126 @@
 <pre><code class="language-Go">package main
 
 import (
-    &quot;fmt&quot;
+	&quot;fmt&quot;
 	&quot;strings&quot;
-    &quot;sync&quot;
-    &quot;time&quot;
+	&quot;sync&quot;
+	&quot;time&quot;
 )
 
 type (
-    // subscriber is a channel
-    subscriber chan interface{}
-    topicFunc  func(v interface{}) bool
+	// subscriber is a channel
+	subscriber chan interface{}
+	topicFunc  func(v interface{}) bool
 )
 
 // the publisher object
 type Publisher struct {
-    m                   sync.RWMutex
-    buffer             int                                          // the cache size of subscription queue
-    timeout          time.Duration                        // publish timeout
-    subscribers     map[subscriber]topicFunc    // subscriber information
+	m               sync.RWMutex
+	buffer          int                         // the cache size of subscription queue
+	timeout         time.Duration               // publish timeout
+	subscribers     map[subscriber]topicFunc    // subscriber information
 }
 
 func NewPublisher(timeout time.Duration, buffer int) *Publisher {
-    return &amp;Publisher {
-        buffer:         buffer
-        timeout:      timeout,
-        subscribers: make(map[subscriber]topicFunc),
-    }
+	return &amp;Publisher {
+		buffer:       buffer,
+		timeout:      timeout,
+		subscribers:  make(map[subscriber]topicFunc),
+	}
 }
 
 // add a new subscriber, subscribes all topic
 func (p *Publisher) Subscribe() chan interface{} {
-    return p.SubscribeTopic(nil)
+	return p.SubscribeTopic(nil)
 }
 
 // add a new subscriber, subscribes the topic filtrated by filter
 func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
-    ch := make(chan interface{}, p.buffer)
-    p.m.Lock()
-    p.subscribers[ch] = topic
-    p.m.Unlock()
-    return ch
+	ch := make(chan interface{}, p.buffer)
+	p.m.Lock()
+	p.subscribers[ch] = topic
+	p.m.Unlock()
+	return ch
 }
 
 func (p *Publisher) Exit(sub chan interface{}) {
-    p.m.Lock()
-    defer p.m.Unlock()
+	p.m.Lock()
+	defer p.m.Unlock()
 
-    delete(p.subscribers, sub)
-    close(sub)
+	delete(p.subscribers, sub)
+	close(sub)
 }
 
 // publish a topic
 func (p *Publisher) Publish(v interface{}) {
-    p.m.RLock()
-    defer p.m.RUnlock()
+	p.m.RLock()
+	defer p.m.RUnlock()
 
-    var wg sync.WaitGroup
-    for sub, topic := range p.subscribers {
-        wg.Add(1)
-        go p.SendTopic(sub, topic, v, &amp;wg)
-    }
-    wg.Wait()
+	var wg sync.WaitGroup
+	for sub, topic := range p.subscribers {
+		wg.Add(1)
+		go p.SendTopic(sub, topic, v, &amp;wg)
+	}
+	wg.Wait()
 }
 
 // close publisher object, at the same time, close all the channel of subscribers
 func (p *Publisher) Close() {
-    p.m.Lock()
-    defer p.m.Unlock()
+	p.m.Lock()
+	defer p.m.Unlock()
 
-    for _, sub := range p.subscribers {
-        delete(p.subscribers, sub)
-        close(sub)
-    }
+	for sub := range p.subscribers {
+		delete(p.subscribers, sub)
+		close(sub)
+	}
 }
 
 // send topic, can tolerate a certain timeout
 func (p *Publisher) SendTopic(sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup) {
-    defer wg.Done()
-    if topic != nil &amp;&amp; !topic(v) {
-        return
-    }
-    select {
-        case sub &lt;- v:
-            // ......
-        case &lt;- time.After(p.timeout):
-            // ......
-    }
+	defer wg.Done()
+	if topic != nil &amp;&amp; !topic(v) {
+		return
+	}
+	select {
+	case sub &lt;- v:
+		// ......
+	case &lt;- time.After(p.timeout):
+		// ......
+	}
 }
 
 // test code ...
 func main() {
-    p := NewPublisher(time.Millisecond * 100, 10)
-    defer p.close()
+	p := NewPublisher(time.Millisecond * 100, 10)
+	defer p.Close()
 
-    all := p.Subscribe()
-    gTopic := p.SubscribeTopic(func(v interface{}) bool {
-        if s, ok := v.(string); ok {
-            return strings.Contains(s, &quot;golang&quot;)
-        }
-        return false
-    })
+	all := p.Subscribe()
+	gTopic := p.SubscribeTopic(func(v interface{}) bool {
+		if s, ok := v.(string); ok {
+			return strings.Contains(s, &quot;golang&quot;)
+		}
+		return false
+	})
 
-    // pub
-    p.Publish(&quot;hello world!&quot;)
-    p.Publish(&quot;hello golang!&quot;)
+	// pub
+	p.Publish(&quot;hello world!&quot;)
+	p.Publish(&quot;hello golang!&quot;)
 
-    // sub
-    go func() {
-        for msg := range all {
-            fmt.Println(&quot;all: &quot;, msg)
-        }
-    }()
+	// sub
+	go func() {
+		for msg := range all {
+			fmt.Println(&quot;all: &quot;, msg)
+		}
+	}()
 
-    go func() {
-        for msg := range gTopic {
-            fmt.Println(&quot;golang: &quot;, msg)
-        }
-    }()
+	go func() {
+		for msg := range gTopic {
+			fmt.Println(&quot;golang: &quot;, msg)
+		}
+	}()
 
-    // exit after a certain time
-    time.Sleep(time.Second * 3)
+	// exit after a certain time
+	time.Sleep(time.Second * 3)
 }
 </code></pre>
 <blockquote>
@@ -447,8 +447,8 @@ func main() {
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
                 <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/&sharesource=qzone&title=Go语言并发编程模型(六) -- 发布订阅模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607351241742&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/&sharesource=weibo&title=Go语言并发编程模型(六) -- 发布订阅模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607351241742"><i class="fa fa-weibo "></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/&sharesource=qzone&title=Go语言并发编程模型(六) -- 发布订阅模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607351697128&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/&sharesource=weibo&title=Go语言并发编程模型(六) -- 发布订阅模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607351697128"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-07T14:27:25.181Z</updated>
+    <updated>2020-12-07T14:35:02.220Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -24,126 +24,126 @@
 <pre><code class="language-Go">package main
 
 import (
-    &quot;fmt&quot;
+	&quot;fmt&quot;
 	&quot;strings&quot;
-    &quot;sync&quot;
-    &quot;time&quot;
+	&quot;sync&quot;
+	&quot;time&quot;
 )
 
 type (
-    // subscriber is a channel
-    subscriber chan interface{}
-    topicFunc  func(v interface{}) bool
+	// subscriber is a channel
+	subscriber chan interface{}
+	topicFunc  func(v interface{}) bool
 )
 
 // the publisher object
 type Publisher struct {
-    m                   sync.RWMutex
-    buffer             int                                          // the cache size of subscription queue
-    timeout          time.Duration                        // publish timeout
-    subscribers     map[subscriber]topicFunc    // subscriber information
+	m               sync.RWMutex
+	buffer          int                         // the cache size of subscription queue
+	timeout         time.Duration               // publish timeout
+	subscribers     map[subscriber]topicFunc    // subscriber information
 }
 
 func NewPublisher(timeout time.Duration, buffer int) *Publisher {
-    return &amp;Publisher {
-        buffer:         buffer
-        timeout:      timeout,
-        subscribers: make(map[subscriber]topicFunc),
-    }
+	return &amp;Publisher {
+		buffer:       buffer,
+		timeout:      timeout,
+		subscribers:  make(map[subscriber]topicFunc),
+	}
 }
 
 // add a new subscriber, subscribes all topic
 func (p *Publisher) Subscribe() chan interface{} {
-    return p.SubscribeTopic(nil)
+	return p.SubscribeTopic(nil)
 }
 
 // add a new subscriber, subscribes the topic filtrated by filter
 func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
-    ch := make(chan interface{}, p.buffer)
-    p.m.Lock()
-    p.subscribers[ch] = topic
-    p.m.Unlock()
-    return ch
+	ch := make(chan interface{}, p.buffer)
+	p.m.Lock()
+	p.subscribers[ch] = topic
+	p.m.Unlock()
+	return ch
 }
 
 func (p *Publisher) Exit(sub chan interface{}) {
-    p.m.Lock()
-    defer p.m.Unlock()
+	p.m.Lock()
+	defer p.m.Unlock()
 
-    delete(p.subscribers, sub)
-    close(sub)
+	delete(p.subscribers, sub)
+	close(sub)
 }
 
 // publish a topic
 func (p *Publisher) Publish(v interface{}) {
-    p.m.RLock()
-    defer p.m.RUnlock()
+	p.m.RLock()
+	defer p.m.RUnlock()
 
-    var wg sync.WaitGroup
-    for sub, topic := range p.subscribers {
-        wg.Add(1)
-        go p.SendTopic(sub, topic, v, &amp;wg)
-    }
-    wg.Wait()
+	var wg sync.WaitGroup
+	for sub, topic := range p.subscribers {
+		wg.Add(1)
+		go p.SendTopic(sub, topic, v, &amp;wg)
+	}
+	wg.Wait()
 }
 
 // close publisher object, at the same time, close all the channel of subscribers
 func (p *Publisher) Close() {
-    p.m.Lock()
-    defer p.m.Unlock()
+	p.m.Lock()
+	defer p.m.Unlock()
 
-    for _, sub := range p.subscribers {
-        delete(p.subscribers, sub)
-        close(sub)
-    }
+	for sub := range p.subscribers {
+		delete(p.subscribers, sub)
+		close(sub)
+	}
 }
 
 // send topic, can tolerate a certain timeout
 func (p *Publisher) SendTopic(sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup) {
-    defer wg.Done()
-    if topic != nil &amp;&amp; !topic(v) {
-        return
-    }
-    select {
-        case sub &lt;- v:
-            // ......
-        case &lt;- time.After(p.timeout):
-            // ......
-    }
+	defer wg.Done()
+	if topic != nil &amp;&amp; !topic(v) {
+		return
+	}
+	select {
+	case sub &lt;- v:
+		// ......
+	case &lt;- time.After(p.timeout):
+		// ......
+	}
 }
 
 // test code ...
 func main() {
-    p := NewPublisher(time.Millisecond * 100, 10)
-    defer p.close()
+	p := NewPublisher(time.Millisecond * 100, 10)
+	defer p.Close()
 
-    all := p.Subscribe()
-    gTopic := p.SubscribeTopic(func(v interface{}) bool {
-        if s, ok := v.(string); ok {
-            return strings.Contains(s, &quot;golang&quot;)
-        }
-        return false
-    })
+	all := p.Subscribe()
+	gTopic := p.SubscribeTopic(func(v interface{}) bool {
+		if s, ok := v.(string); ok {
+			return strings.Contains(s, &quot;golang&quot;)
+		}
+		return false
+	})
 
-    // pub
-    p.Publish(&quot;hello world!&quot;)
-    p.Publish(&quot;hello golang!&quot;)
+	// pub
+	p.Publish(&quot;hello world!&quot;)
+	p.Publish(&quot;hello golang!&quot;)
 
-    // sub
-    go func() {
-        for msg := range all {
-            fmt.Println(&quot;all: &quot;, msg)
-        }
-    }()
+	// sub
+	go func() {
+		for msg := range all {
+			fmt.Println(&quot;all: &quot;, msg)
+		}
+	}()
 
-    go func() {
-        for msg := range gTopic {
-            fmt.Println(&quot;golang: &quot;, msg)
-        }
-    }()
+	go func() {
+		for msg := range gTopic {
+			fmt.Println(&quot;golang: &quot;, msg)
+		}
+	}()
 
-    // exit after a certain time
-    time.Sleep(time.Second * 3)
+	// exit after a certain time
+	time.Sleep(time.Second * 3)
 }
 </code></pre>
 <blockquote>
