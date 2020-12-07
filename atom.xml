@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-07T02:46:55.246Z</updated>
+    <updated>2020-12-07T14:25:21.575Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -10,6 +10,146 @@
     <logo>https://TomorrowTown.github.io/images/avatar.png</logo>
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
+    <entry>
+        <title type="html"><![CDATA[Go语言并发编程模型(六) -- 发布订阅模型]]></title>
+        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/</id>
+        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/">
+        </link>
+        <updated>2020-11-29T15:52:10.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
+<p>相比于生产者消费者模型而言，消息的生产者在发布订阅模型中充当了消息的发布者(publisher)，消息的消费者充当了消息的订阅者(subscriber)。<br>
+在传统的生产者消费者模型中，消息被发送到一个队列中，而在发布订阅模型中，消息被发布给一个主题(topic)。<br>
+在发布订阅模型中，每一个消息都被传递给多个订阅者。发布者通常不知道也不关心哪个订阅者收到了主题消息。发布者和订阅者可以在运行时动态地添加，是一种松散的耦合关系，这使得系统地复杂性会随着时间的推移而增长。</p>
+<h2 id="一个支持多主题的pub-sub库的简易实现">一个支持多主题的pub-sub库的简易实现</h2>
+<pre><code class="language-Go">package main
+
+import (
+    &quot;sync&quot;
+    &quot;time&quot;
+)
+
+type (
+    // subscriber is a channel
+    subscriber chan interface{}
+    topicFunc  func(v interface{}) bool
+)
+
+// the publisher object
+type Publisher struct {
+    m                   sync.RWMutex
+    buffer             int                                          // the cache size of subscription queue
+    timeout          time.Duration                        // publish timeout
+    subscribers     map[subscriber]topicFunc    // subscriber information
+}
+
+func NewPublisher(timeout time.Duration, buffer int) *Publisher {
+    return &amp;Publisher {
+        buffer:         buffer
+        timeout:      timeout,
+        subscribers: make(map[subscriber]topicFunc),
+    }
+}
+
+// add a new subscriber, subscribes all topic
+func (p *Publisher) Subscribe() chan interface{} {
+    return p.SubscribeTopic(nil)
+}
+
+// add a new subscriber, subscribes the topic filtrated by filter
+func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
+    ch := make(chan interface{}, p.buffer)
+    p.m.Lock()
+    p.subscribers[ch] = topic
+    p.m.Unlock()
+    return ch
+}
+
+func (p *Publisher) Exit(sub chan interface{}) {
+    p.m.Lock()
+    defer p.m.Unlock()
+
+    delete(p.subscribers, sub)
+    close(sub)
+}
+
+// publish a topic
+func (p *Publisher) Publish(v interface{}) {
+    p.m.RLock()
+    defer p.m.RUnlock()
+
+    var wg sync.WaitGroup
+    for sub, topic := range p.subscribers {
+        wg.Add(1)
+        go p.SendTopic(sub, topic, v, &amp;wg)
+    }
+    wg.Wait()
+}
+
+// close publisher object, at the same time, close all the channel of subscribers
+func (p *Publisher) Close() {
+    p.m.Lock()
+    defer p.m.Unlock()
+
+    for _, sub := range p.subscribers {
+        delete(p.subscribers, sub)
+        close(sub)
+    }
+}
+
+// send topic, can tolerate a certain timeout
+func (p *Publisher) SendTopic(sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup) {
+    defer wg.Done()
+    if topic != nil &amp;&amp; !topic(v) {
+        return
+    }
+    select {
+        case sub &lt;- v:
+            // ......
+        case &lt;- time.After(p.timeout):
+            // ......
+    }
+}
+
+// test code ...
+func main() {
+    p := NewPublisher(time.Millisecond * 100, 10)
+    defer p.close()
+
+    all := p.Subscribe()
+    gTopic := p.SubscribeTopic(func(v interface{}) bool {
+        if s, ok := v.(string); ok {
+            return strings.Contains(s, &quot;golang&quot;)
+        }
+        return false
+    })
+
+    // pub
+    p.Publish(&quot;hello world!&quot;)
+    p.Publish(&quot;hello golang!&quot;)
+
+    // sub
+    go func() {
+        for msg := range all {
+            fmt.Println(&quot;all: &quot;, msg)
+        }
+    }()
+
+    go func() {
+        for msg := range gTopic {
+            fmt.Println(&quot;golang: &quot;, msg)
+        }
+    }()
+
+    // exit after a certain time
+    time.Sleep(time.Second * 3)
+}
+</code></pre>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(五) -- 生产者消费者模型]]></title>
         <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-qi-sheng-chan-zhe-xiao-fei-zhe-mo-xing/</id>
