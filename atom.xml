@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-07T14:35:02.220Z</updated>
+    <updated>2020-12-07T15:00:54.787Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -84,6 +84,7 @@ func (p *Publisher) Publish(v interface{}) {
 		wg.Add(1)
 		go p.SendTopic(sub, topic, v, &amp;wg)
 	}
+    // wait for all goroutines excute finish
 	wg.Wait()
 }
 
