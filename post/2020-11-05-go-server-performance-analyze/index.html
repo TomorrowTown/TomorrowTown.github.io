@@ -233,20 +233,24 @@
                     <article class="post post-type real-post">
                         <header class="post-type-header">
                             
-                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing.png')"></div>
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-11-05-go-server-performance-analyze.jpeg')"></div>
                                 
                                         <div class="thumbnail-shadow">
                                             <h1 class="post-title">
-                                                Go语言并发编程模型(六) -- 发布订阅模型
+                                                go服务器性能分析方法
                                             </h1>
                                             <div class="post-info">
                                                 <span class="post-category"><i class="Card Card-novel"></i>
                                         
+                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/n9MXmjtY-/'">服务器开发</span>
+                                                
+                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/lXXd7xbfA/'">golang</span>
+                                                
                                                     </span>
                                                     <span class="post-view">
                                                     
                                                         &nbsp;•&nbsp;
-                                                    <span id="/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(六) -- 发布订阅模型">
+                                                    <span id="/post/2020-11-05-go-server-performance-analyze/" class="leancloud_visitors" data-flag-title="go服务器性能分析方法">
                                                 <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
                                                 <i class="leancloud-visitors-count">0</i>
                                             </span>
@@ -255,153 +259,98 @@
                                                             </span>&nbsp;•&nbsp;
 
                                                             <span class="post-readtime">阅读时间:
-                                            3.0分</span>
+                                            2.8分</span>
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
                                             <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607436338048" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607436338048" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
-                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-05</span>
                                         </div>
                         </header>
                         <div class="post-main post-type-main">
                             <div class="post-content">
                                 <div class="post-content-real">
-                                    <h2 id="0x00">0x00</h2>
-<p>相比于生产者消费者模型而言，消息的生产者在发布订阅模型中充当了消息的发布者(publisher)，消息的消费者充当了消息的订阅者(subscriber)。<br>
-在传统的生产者消费者模型中，消息被发送到一个队列中，而在发布订阅模型中，消息被发布给一个主题(topic)。<br>
-在发布订阅模型中，每一个消息都被传递给多个订阅者。发布者通常不知道也不关心哪个订阅者收到了主题消息。发布者和订阅者可以在运行时动态地添加，是一种松散的耦合关系，这使得系统地复杂性会随着时间的推移而增长。</p>
-<h2 id="一个支持多主题的pub-sub库的简易实现">一个支持多主题的pub-sub库的简易实现</h2>
-<pre><code class="language-Go">package main
-
-import (
-	&quot;fmt&quot;
-	&quot;strings&quot;
-	&quot;sync&quot;
-	&quot;time&quot;
-)
-
-type (
-	// subscriber is a channel
-	subscriber chan interface{}
-	topicFunc  func(v interface{}) bool
-)
-
-// the publisher object
-type Publisher struct {
-	m               sync.RWMutex
-	buffer          int                         // the cache size of subscription queue
-	timeout         time.Duration               // publish timeout
-	subscribers     map[subscriber]topicFunc    // subscriber information
-}
-
-func NewPublisher(timeout time.Duration, buffer int) *Publisher {
-	return &amp;Publisher {
-		buffer:       buffer,
-		timeout:      timeout,
-		subscribers:  make(map[subscriber]topicFunc),
-	}
-}
-
-// add a new subscriber, subscribes all topic
-func (p *Publisher) Subscribe() chan interface{} {
-	return p.SubscribeTopic(nil)
-}
-
-// add a new subscriber, subscribes the topic filtrated by filter
-func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
-	ch := make(chan interface{}, p.buffer)
-	p.m.Lock()
-	p.subscribers[ch] = topic
-	p.m.Unlock()
-	return ch
-}
-
-func (p *Publisher) Exit(sub chan interface{}) {
-	p.m.Lock()
-	defer p.m.Unlock()
-
-	delete(p.subscribers, sub)
-	close(sub)
-}
-
-// publish a topic
-func (p *Publisher) Publish(v interface{}) {
-	p.m.RLock()
-	defer p.m.RUnlock()
-
-	var wg sync.WaitGroup
-	for sub, topic := range p.subscribers {
-		wg.Add(1)
-		go p.SendTopic(sub, topic, v, &amp;wg)
-	}
-    // wait for all goroutines excute finish
-	wg.Wait()
-}
-
-// close publisher object, at the same time, close all the channel of subscribers
-func (p *Publisher) Close() {
-	p.m.Lock()
-	defer p.m.Unlock()
-
-	for sub := range p.subscribers {
-		delete(p.subscribers, sub)
-		close(sub)
-	}
-}
-
-// send topic, can tolerate a certain timeout
-func (p *Publisher) SendTopic(sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup) {
-	defer wg.Done()
-	if topic != nil &amp;&amp; !topic(v) {
-		return
-	}
-	select {
-	case sub &lt;- v:
-		// ......
-	case &lt;- time.After(p.timeout):
-		// ......
-	}
-}
-
-// test code ...
-func main() {
-	p := NewPublisher(time.Millisecond * 100, 10)
-	defer p.Close()
-
-	all := p.Subscribe()
-	gTopic := p.SubscribeTopic(func(v interface{}) bool {
-		if s, ok := v.(string); ok {
-			return strings.Contains(s, &quot;golang&quot;)
-		}
-		return false
-	})
-
-	// pub
-	p.Publish(&quot;hello world!&quot;)
-	p.Publish(&quot;hello golang!&quot;)
-
-	// sub
-	go func() {
-		for msg := range all {
-			fmt.Println(&quot;all: &quot;, msg)
-		}
-	}()
-
-	go func() {
-		for msg := range gTopic {
-			fmt.Println(&quot;golang: &quot;, msg)
-		}
-	}()
-
-	// exit after a certain time
-	time.Sleep(time.Second * 3)
-}
+                                    <h2 id="pprof">pprof</h2>
+<ol>
+<li>在需要监测的server源码中的main或init中引入:</li>
+</ol>
+<pre><code class="language-go">import _ &quot;net/http/pprof&quot;
+</code></pre>
+<ol start="2">
+<li>启动http监听端口，以此作为性能分析数据展示网页。</li>
+</ol>
+<pre><code class="language-go">go http.ListenAndServe(&quot;:9999&quot;, nil)
+</code></pre>
+<p>这样，默认访问地址为localhost:9999。</p>
+<blockquote>
+<p>无论是否是http服务, 都可以引入<strong>net/http/pprof</strong>作为性能分析的工具。</p>
+</blockquote>
+<h2 id="go-torch和flamegraph">go-torch和FlameGraph</h2>
+<ol>
+<li>安装go-torch和FlameGraph</li>
+</ol>
+<pre><code class="language-shell">go get github.com/uber/go-torch
+cd $GOPATH/src/github.com/uber/go-torch
+git clone https://github.com/brendangregg/FlameGraph.git
+sudo cp ./FlameGraph/flamegraph.pl /usr/local/bin
+</code></pre>
+<p>**NOTE: **go get到的项目默认会放到用户目录下的go文件夹，以此作为该项目的GOPATH。</p>
+<blockquote>
+<p>可能遇到的问题:<br>
+go get github.com/uber/go-torch时，有可能出现：</p>
+<pre><code class="language-shell">unrecognized import path &quot;golang.org/x/sys/unix&quot;: https fetch: Get . . . . . . i/o timeout
+</code></pre>
+<p>此时需要:</p>
+<pre><code class="language-shell">mkdir -p $GOPATH/src/golang.org.x
+cd $GOPATH/src/golang.org/x
+git clone https://github.com/golang/sys.git 即可
+</code></pre>
+</blockquote>
+<ol start="2">
+<li>安装包管理工具<br>
+glide用于编译上述下载的go-torch。</li>
+</ol>
+<pre><code class="language-shell">go get github.com/Masterminds/glide
+cd $GOPATH/src/github.com/uber/go-torch
+glide install
 </code></pre>
 <blockquote>
-<p>References:<br>
-<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+<p>可能遇到的问题:<br>
+在glide install时可能出现:<br>
+<img src="https://TomorrowTown.github.io/post-images/1604588907765.png" alt="" loading="lazy"><br>
+直接无视即可。</p>
 </blockquote>
+<ol start="3">
+<li>运行测试用例</li>
+</ol>
+<pre><code class="language-shell">...... go-torch]$ go test ./...
+</code></pre>
+<blockquote>
+<p>可能遇到的问题:<br>
+出现一堆编译报错。但只要下列语句都没fail, 即可无视其他报错：<br>
+<img src="https://TomorrowTown.github.io/post-images/1604588991700.png" alt="" loading="lazy"><br>
+最后需要到GOPATH的bin目录下查看是否生成了<strong>go-torch</strong>可执行文件, 有则成功</p>
+</blockquote>
+<h2 id="运行go-torch获取火焰图">运行go-torch获取火焰图</h2>
+<p>在成功完成了上述所有步骤后，在任意文件夹下都可运行 go-torch命令了。<br>
+例：</p>
+<pre><code class="language-shell">go-torch -u http://localhost:9999 -t 30 -f perf.svg
+</code></pre>
+<p>等待30s，在运行命令的目录下就会生成一份perf.svg（默认是torch.svg）文件, 直接网页打开(实测chome/Edge可正常打开并可点击方块zoom in)该文件即可看到火焰图：<br>
+<img src="https://TomorrowTown.github.io/post-images/1604589121478.png" alt="" loading="lazy"></p>
+<h2 id="进一步寻找性能痛点">进一步寻找性能痛点</h2>
+<p>再次用相同的测试条件测试，不过现在仅需要运行：</p>
+<pre><code class="language-shell">go tool pprof --seconds 60 http://localhost:9999/debug/pprof/profile
+</code></pre>
+<p>60s后会得到cpu分析文件，此时不再是火焰图。<br>
+根据之前获得的火焰图，找到不应该占用那么多CPU但是却占用了那么多的方法。<br>
+在命令行窗口(pprof)后输入<strong>list 方法名</strong>，<br>
+如果找到了具体哪一步消耗的cpu高，如果该步是另一个包的方法，也无所谓，直接<strong>list 方法名</strong>即可。<br>
+(ps: 输入exit可退出go tool pprof)<br>
+会得到该方法中具体哪一步cpu消耗的值，进而得到了该方法的性能痛点。<br>
+最后就着手优化吧:)</p>
+<p><strong>Tips：<strong>火焰图中，纵轴从下到上代表</strong>调用顺序</strong>，横轴每个方块的长度代表<strong>占用CPU的时长百分比</strong>。</p>
 
                                 </div>
                             </div>
@@ -411,8 +360,8 @@ func main() {
                             <div class="post-copyright">
                                 作者:
                                 tomorrow<br>永久链接:
-                                    <a href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/" title="Go语言并发编程模型(六) -- 发布订阅模型">
-                                        https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/
+                                    <a href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/" title="go服务器性能分析方法">
+                                        https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/
                                     </a><br> 协议: MIT License
                             </div>
                         </div>
@@ -436,27 +385,21 @@ func main() {
                 <div class="lite-item nearby-article">
                     
                         <div class="nearby-article-left" style="padding: 10px;">
-                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-jiu-kong-zhi-bing-fa-shu/">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/golang-basics-array/">
                                 <i class="fa fa-chevron-left"></i>
-                                Go语言并发编程模型(七) -- 控制并发数
+                                Go语言基础(一) -- array
                             </a>
                         </div>
                         
                             
-                                <div class="nearby-article-right" style="padding: 10px;">
-                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-qi-sheng-chan-zhe-xiao-fei-zhe-mo-xing/">
-                                        Go语言并发编程模型(五) -- 生产者消费者模型<i class="fa fa-chevron-right"></i>
-                                    </a>
-                                </div>
-                                
                 </div>
                 <!--Share-->
                 <span style="margin-right:15px">
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
-                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/&sharesource=qzone&title=Go语言并发编程模型(六) -- 发布订阅模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607436338048&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/&sharesource=weibo&title=Go语言并发编程模型(六) -- 发布订阅模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607436338048"><i class="fa fa-weibo "></i></a>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/&sharesource=qzone&title=go服务器性能分析方法&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607436338048&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/&sharesource=weibo&title=go服务器性能分析方法 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607436338048"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             
