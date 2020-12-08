@@ -228,240 +228,186 @@
     <a id="theme-btn" class="theme-btn" onclick="App.changeTheme()"><i id="themeIcon" class="Card Card-moon"></i></a>
 </header>
         <div id="main">
-            <div id="usercard">
-                <ul>
-                    <li class="lite-item">
-                        <div class="card-bg"></div>
-                        <div class="card-info">
+            <div id="main-part">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
                             
-                                    <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" class="avatar" style="height: 100px;">
-                                    
-                                        <span class="card-info-block card-info-name">tomorrow&nbsp;<i
-                                class="Card Card-certify"></i></span>
-                                        <span>"我猪肉佬何尝不想当一个伟大的舞蹈家"</span>
-                        </div>
-                        <div class="catch-me">
-                            <a data-content="rss" data-balloon-pos="up" target="_blank" href="https://TomorrowTown.github.io/atom.xml"><i class="fa fa-rss"></i></a>
-                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-9-go-basic-context.png')"></div>
                                 
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言并发编程模型(九) -- context
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            
-                                                
-                                                        
-                                                
-                                                        
-                                                
-                                                    <a data-content="github" data-balloon-pos="up" target="_blank" href="https://github.com/TomorrowTown"><i class="fa fa-github"></i></a>
+                                                    </span>
+                                                    <span class="post-view">
                                                     
-                                                        
-                                                
-                                                        
-                                                
-                                                        
-                                                
-                                                        
-                                                
-                                                        
-                                                
-                                                        
-                                                            
-                                                                
-                                                                        
-                                                                
-                                                                    <a data-content="zhihu" data-balloon-pos="up" target="_blank" href="https://www.zhihu.com/people/tang-ming-tian-68"><i class="Card Card-zhihu"></i></a>
-                                                                    
-                                                                        
-                                                                
-                                                                        
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-12-9-go-basic-context/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(九) -- context">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
+
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            1.6分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <h2 id="0x00">0x00</h2>
+<p>在Go1.7发布时，标准库增加了一个<strong>context</strong>包，用来简化对于处理单个请求的多个goroutine之间与请求域的数据、超时和退出等操作。</p>
+<h2 id="context包的应用">context包的应用</h2>
+<h3 id="1-线程安全退出和超时控制">1. 线程安全退出和超时控制</h3>
+<pre><code class="language-Go">// when the concurrent body timeout or 'main' actively stops the worker goroutine, each worker can safely exit
+func worker(ctx context.Context, wg *sync.WaitGroup) error {
+	defer wg.Done()
+
+	for {
+		select {
+		case &lt;- ctx.Done():
+            // exit
+			return ctx.Err()
+		default:
+			fmt.Println(&quot;doing work...&quot;)
+		}
+	}
+}
+
+func main() {
+	ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second * 10)
+
+	wg := &amp;sync.WaitGroup{}
+	for i := 0; i &lt; 10; i++ {
+		wg.Add(1)
+		go func() {
+			err := worker(ctx, wg)
+			fmt.Println(&quot;err = &quot;, err)
+		}()
+	}
+
+	time.Sleep(time.Second)
+	cancelFunc()
+
+	wg.Wait()
+}
+</code></pre>
+<h3 id="2-防止后台goroutine内存泄漏">2. 防止后台goroutine内存泄漏</h3>
+<p>虽然go语言自带垃圾回收，一般不会发生内存泄漏，但当main函数不再使用channel时，后台goroutine有泄漏风险。使用<strong>context</strong>包可以避免这样的情况发生(不需要使用sync.WaitGroup了)。例：</p>
+<pre><code class="language-Go">func worker(ctx context.Context) error {
+    for {
+        select {
+        case &lt;- ctx.Done():
+            // exit
+            return ctx.Err()
+        default:
+            fmt.Println(&quot;doing work...&quot;)
+        }
+    }
+}
+
+func main() {
+    ctx, cancelFunc : = context.WithCancel(context.Background())
+    wg := &amp;sync.WaitGroup{}
+    for i := 0; i &lt; 10; i++ {
+        go func() {
+            err := worker(ctx)
+        }()
+    }
+
+    /*
+    * when the main function completes its work, it will calls cancelFunc() first,  
+    * to notify the background Goroutine to exit, 
+    * thus avoiding the leakage of Goroutine.
+    */
+    cancelFunc()
+}
+</code></pre>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+
+                                </div>
+                            </div>
+                            
                         </div>
-                    </li>
-                </ul>
-            </div>
-            <div>
-                <div id="main-part">
-                    <ul class="posts-list">
-                        
-    <li class="lite-item">
-        <article class="post post-type">
-            <header class="post-type-header">
-                <div class="post-relative">
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/" title="Go语言并发编程模型(九) -- context">
+                                        https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/
+                                    </a><br> 协议: MIT License
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
                     
-                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" class="avatar" width="100" height="100">
-                            
-                                <span class="post-type-author">
-                    tomorrow
-                    <i class="Card Card-certify"></i><span class="publish-time"> - <i class="fa fa-calendar"
-                            aria-hidden="true"></i> 2020-11-16</span>
-                                </span>
-                                <h3 class="post-type-title">
-                                    <a href="https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/" rel="bookmark" title="游戏开发中的设计模式(一) -- 命令模式">
-                                        
-                                                游戏开发中的设计模式(一) -- 命令模式
-                                    </a>
-                                </h3>
-                </div>
-            </header>
-            <div class="post-main post-type-main">
-                <div class="post-content">
-                    <div class="post-tag"></div>
-                    <div class="post-excerpt">
-                        
-                                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-                                    
-                    </div>
-                    <div class="post-category">
-                        
-                            <i class="fa fa-tags" aria-hidden="true"></i>
-                            
-                                <a href="https://TomorrowTown.github.io/tag/CHJWtbNKg/" rel="category">
-                                    游戏开发
-                                        
-                                            ,
-                                            
-                                </a>
-                                
-                                <a href="https://TomorrowTown.github.io/tag/4AAgEC-1o/" rel="category">
-                                    设计模式
-                                        
-                                </a>
-                                
-                                    
-                    </div>
-                </div>
-            </div>
-            <div class="post-footer">
-                <span id="spnBtn" style="text-align: center;" onclick="javascript:top.location='https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/'">
-                    <i class="Card Card-more-o"></i> &#x9605;&#x8BFB;
-                </span>
-                <span id="spnBtn" style="text-align: center;" onclick="javascript:window.open('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/')">
-                    <i class=" Card Card-share "></i> &#x4E8C;&#x7EF4;&#x7801;&#x5206;&#x4EAB;
-                </span>
-            </div>
-        </article>
-    </li>
-    
-    <li class="lite-item">
-        <article class="post post-type">
-            <header class="post-type-header">
-                <div class="post-relative">
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
                     
-                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" class="avatar" width="100" height="100">
                             
-                                <span class="post-type-author">
-                    tomorrow
-                    <i class="Card Card-certify"></i><span class="publish-time"> - <i class="fa fa-calendar"
-                            aria-hidden="true"></i> 2020-11-12</span>
-                                </span>
-                                <h3 class="post-type-title">
-                                    <a href="https://TomorrowTown.github.io/post/golang-basics-array/" rel="bookmark" title="Go语言基础(一) -- array">
-                                        
-                                                Go语言基础(一) -- array
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-shi-yi-bing-fa-de-an-quan-tui-chu/">
+                                        Go语言并发编程模型(八) -- 并发的安全退出<i class="fa fa-chevron-right"></i>
                                     </a>
-                                </h3>
-                </div>
-            </header>
-            <div class="post-main post-type-main">
-                <div class="post-content">
-                    <div class="post-tag"></div>
-                    <div class="post-excerpt">
-                        
-                                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-                                    
-                    </div>
-                    <div class="post-category">
-                        
-                            <i class="fa fa-tags" aria-hidden="true"></i>
-                            
-                                <a href="https://TomorrowTown.github.io/tag/lXXd7xbfA/" rel="category">
-                                    golang
-                                        
-                                </a>
+                                </div>
                                 
-                                    
-                    </div>
                 </div>
-            </div>
-            <div class="post-footer">
-                <span id="spnBtn" style="text-align: center;" onclick="javascript:top.location='https://TomorrowTown.github.io/post/golang-basics-array/'">
-                    <i class="Card Card-more-o"></i> &#x9605;&#x8BFB;
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/&sharesource=qzone&title=Go语言并发编程模型(九) -- context&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607446041233&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/&sharesource=weibo&title=Go语言并发编程模型(九) -- context + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233"><i class="fa fa-weibo "></i></a>
                 </span>
-                <span id="spnBtn" style="text-align: center;" onclick="javascript:window.open('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/golang-basics-array/')">
-                    <i class=" Card Card-share "></i> &#x4E8C;&#x7EF4;&#x7801;&#x5206;&#x4EAB;
-                </span>
-            </div>
-        </article>
-    </li>
-    
-    <li class="lite-item">
-        <article class="post post-type">
-            <header class="post-type-header">
-                <div class="post-relative">
-                    
-                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446041233" class="avatar" width="100" height="100">
-                            
-                                <span class="post-type-author">
-                    tomorrow
-                    <i class="Card Card-certify"></i><span class="publish-time"> - <i class="fa fa-calendar"
-                            aria-hidden="true"></i> 2020-11-05</span>
-                                </span>
-                                <h3 class="post-type-title">
-                                    <a href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/" rel="bookmark" title="go服务器性能分析方法">
-                                        
-                                                go服务器性能分析方法
-                                    </a>
-                                </h3>
-                </div>
-            </header>
-            <div class="post-main post-type-main">
-                <div class="post-content">
-                    <div class="post-tag"></div>
-                    <div class="post-excerpt">
-                        
-                                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-                                    
-                    </div>
-                    <div class="post-category">
-                        
-                            <i class="fa fa-tags" aria-hidden="true"></i>
-                            
-                                <a href="https://TomorrowTown.github.io/tag/n9MXmjtY-/" rel="category">
-                                    服务器开发
-                                        
-                                            ,
+                
                                             
-                                </a>
-                                
-                                <a href="https://TomorrowTown.github.io/tag/lXXd7xbfA/" rel="category">
-                                    golang
-                                        
-                                </a>
-                                
-                                    
-                    </div>
-                </div>
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
-            <div class="post-footer">
-                <span id="spnBtn" style="text-align: center;" onclick="javascript:top.location='https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/'">
-                    <i class="Card Card-more-o"></i> &#x9605;&#x8BFB;
-                </span>
-                <span id="spnBtn" style="text-align: center;" onclick="javascript:window.open('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/')">
-                    <i class=" Card Card-share "></i> &#x4E8C;&#x7EF4;&#x7801;&#x5206;&#x4EAB;
-                </span>
-            </div>
-        </article>
-    </li>
-    
-                    </ul>
-                    <div class="lite-item">
-                        
-                            <span id="spnBtn" style="display: inline-block;width: 50%;text-align: center;border-right: 1px solid#e3e8e8;font-size: 14px;float: left;padding: 15px;" onclick="javascript:top.location='https://TomorrowTown.github.io/'"> &#x4E0A;&#x4E00;&#x9875;</span>
-                            
-                                    
-                                            <span style="display: inline-block;width: 50%;text-align: center;border-right: 1px solid#e3e8e8;font-size: 14px;padding: 15px;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                                            
-                    </div>
-                </div>
-                <div id="sidebar">
+            <div id="sidebar">
     <ul>
         
                 <!--
@@ -599,8 +545,8 @@
                                                             </li>
     </ul>
 </div>
-            </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -665,5 +611,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>

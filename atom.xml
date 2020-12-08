@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-08T16:20:02.923Z</updated>
+    <updated>2020-12-08T16:47:25.861Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -10,6 +10,86 @@
     <logo>https://TomorrowTown.github.io/images/avatar.png</logo>
     <icon>https://TomorrowTown.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, tomorrow</rights>
+    <entry>
+        <title type="html"><![CDATA[Go语言并发编程模型(九) -- context]]></title>
+        <id>https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/">
+        </link>
+        <updated>2020-11-29T15:56:28.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
+<p>在Go1.7发布时，标准库增加了一个<strong>context</strong>包，用来简化对于处理单个请求的多个goroutine之间与请求域的数据、超时和退出等操作。</p>
+<h2 id="context包的应用">context包的应用</h2>
+<h3 id="1-线程安全退出和超时控制">1. 线程安全退出和超时控制</h3>
+<pre><code class="language-Go">// when the concurrent body timeout or 'main' actively stops the worker goroutine, each worker can safely exit
+func worker(ctx context.Context, wg *sync.WaitGroup) error {
+	defer wg.Done()
+
+	for {
+		select {
+		case &lt;- ctx.Done():
+            // exit
+			return ctx.Err()
+		default:
+			fmt.Println(&quot;doing work...&quot;)
+		}
+	}
+}
+
+func main() {
+	ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second * 10)
+
+	wg := &amp;sync.WaitGroup{}
+	for i := 0; i &lt; 10; i++ {
+		wg.Add(1)
+		go func() {
+			err := worker(ctx, wg)
+			fmt.Println(&quot;err = &quot;, err)
+		}()
+	}
+
+	time.Sleep(time.Second)
+	cancelFunc()
+
+	wg.Wait()
+}
+</code></pre>
+<h3 id="2-防止后台goroutine内存泄漏">2. 防止后台goroutine内存泄漏</h3>
+<p>虽然go语言自带垃圾回收，一般不会发生内存泄漏，但当main函数不再使用channel时，后台goroutine有泄漏风险。使用<strong>context</strong>包可以避免这样的情况发生(不需要使用sync.WaitGroup了)。例：</p>
+<pre><code class="language-Go">func worker(ctx context.Context) error {
+    for {
+        select {
+        case &lt;- ctx.Done():
+            // exit
+            return ctx.Err()
+        default:
+            fmt.Println(&quot;doing work...&quot;)
+        }
+    }
+}
+
+func main() {
+    ctx, cancelFunc : = context.WithCancel(context.Background())
+    wg := &amp;sync.WaitGroup{}
+    for i := 0; i &lt; 10; i++ {
+        go func() {
+            err := worker(ctx)
+        }()
+    }
+
+    /*
+    * when the main function completes its work, it will calls cancelFunc() first,  
+    * to notify the background Goroutine to exit, 
+    * thus avoiding the leakage of Goroutine.
+    */
+    cancelFunc()
+}
+</code></pre>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(八) -- 并发的安全退出]]></title>
         <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-shi-yi-bing-fa-de-an-quan-tui-chu/</id>
@@ -110,6 +190,10 @@ func main() {
 }
 </code></pre>
 <p><strong>NOTE: <strong>由于goroutine在收到退出指令进行退出时会执行一定的清理工作，但是上述程序并不能够保证清理一定能够完成，所以为了保证程序的健壮性，我们需要使用</strong>sync.WaitGroup</strong>，以求main线程能够等待各个goroutine退出完成。</p>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
 ]]></content>
     </entry>
     <entry>
@@ -689,189 +773,6 @@ world := s[7:]
 <blockquote>
 <p>References:<br>
 <a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[游戏开发中的设计模式(一) -- 命令模式]]></title>
-        <id>https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/</id>
-        <link href="https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/">
-        </link>
-        <updated>2020-11-16T15:02:55.000Z</updated>
-        <content type="html"><![CDATA[<p>A command is a reified method call.</p>
-<h2 id="使用场景示例"><strong>使用场景示例</strong></h2>
-<h3 id="输入处理"><strong>输入处理</strong></h3>
-<p>每个游戏都有一处代码块用来处理用户原始的输入，如：按钮点击、键盘事件、鼠标点击等。<br>
-它会记录输入并转换为游戏中的一个动作。<br>
-简单实现：</p>
-<pre><code class="language-cpp">void InputHandler::handleInput()
-{
-    if (isPressed(BUTTON_X)) jump();
-    else if (isPressed(BUTTON_Y)) fire();
-    else if (isPressed(BUTTON_A)) swapWeapon();
-    else if (isPressed(BUTTON_B)) lurchInffectively();
-}
-</code></pre>
-<p>上述代码是有效的，但是如今许多游戏允许用户自定义按钮与游戏行为之间的映射关系。<br>
-所以，为了支持自定义，我们需要把对jump()、fire()等方法的直接调用转换为<strong>可更换的</strong>东西。<br>
-因此我们需要使用对象来代表一个游戏动作。这就用到了命令模式。<br>
-首先，定义一个基类，代表一个可触发的游戏命令：</p>
-<pre><code class="language-cpp">class Command
-{
-public:
-    virtual ~Command() {}
-    virtual void execute() = 0;    
-};
-</code></pre>
-<p>然后为每一个不同的游戏动作创建一个子类：</p>
-<pre><code class="language-cpp">class JumpCmd : public Command
-{
-public:
-    virtual void execute() { jump(); }
-};
-
-class FireCmd : public Command
-{
-    virtual void execute() { fire(); }
-};
-
-/// #TODO: add more action subclass . . .
-</code></pre>
-<p>在输入处理中，为每个按钮存储一个指向命令的指针：</p>
-<pre><code class="language-cpp">class InputHandler
-{
-public:
-    void handleInput();
-
-    ///  #TODO: method to bind commands . . .
-
-private:
-    Command* button_X;
-    Command* button_Y;
-    Command* button_A;
-    Command* button_B;
-};
-</code></pre>
-<p>现在对输入的处理便通过这些指针进行<strong>代理</strong>：</p>
-<pre><code class="language-cpp">void InputHandler::handleInput()
-{
-    if (isPressed(BUTTON_X)) button_X-&gt;execute();
-    else if (isPressed(BUTTON_Y) button_Y-&gt;execute();
-    else if (isPressed(BUTTON_A) button_A-&gt;execute();
-    else if (isPressed(BUTTON_B) button_B-&gt;execute();
-}
-</code></pre>
-<p>之前每个输入都会直接调用一个函数，现在则增加了一个间接调用层。</p>
-<h4 id="解耦角色和命令"><strong>解耦角色和命令</strong></h4>
-<p>在上例中，这些命令的使用范围很窄，只能作用于玩家对象。现在，让我们放宽限制，传入任何一个我们想要控制的对象，而不是让命令自身来确定所控制的对象：</p>
-<pre><code class="language-cpp">class Command
-{
-public:
-    virtual ~Command() {}
-    virtual void execute(GameActor&amp; actor) = 0;
-};
-
-class JumpCmd : public Command
-{
-public:
-    virtual void execute(GameActor&amp; actor) { actor.jump(); }
-};
-</code></pre>
-<p>接下来修改输入处理方法，使其返回一个命令实例，以便调用具体的execute()：</p>
-<pre><code class="language-cpp">Command* InputHandler::handleInput()
-{
-    if (isPressed(BUTTON_X)) return button_X;
-    if (isPressed(BUTTON_Y)) return button_Y;
-    if (isPressed(BUTTON_A)) return button_A;
-    if (isPressed(BUTTON_B)) return button_B;
-
-    return NULL;
-}
-</code></pre>
-<p>最终，对输入的处理转化为动作的映射代码如下：</p>
-<pre><code class="language-cpp">Command* cmd = inputHandler.handleInput();
-if (cmd) { cmd-&gt;execute(actor); }
-</code></pre>
-<h3 id="undoredo"><strong>undo&amp;redo</strong></h3>
-<p>命令模式一个重要的应用就是“撤销操作”。因为命令对象可以<strong>do</strong>一些事，那么就应该能够轻松地<strong>undo</strong>它们。这在游戏中应用广泛，比如策略游戏中的回滚操作，以及一些游戏的重播功能。<br>
-上述例子中，我们希望从被操控的角色中抽象出命令，以便角色和命令解耦；但在这个例子中，我们希望<u>将命令绑定到被移动的角色</u>上，以便能够实现角色动作的回滚。<br>
-示例代码：<br>
-封装移动操作：</p>
-<pre><code class="language-cpp">class MoveUnitCmd : public Command
-{
-public:
-    MoveUnitCmd(Unit* unit, int x, int y) : mUnit(uint), mX(x), mY(y) {}
-    virtual void execute() { mUnit-&gt;moveTo(mX, mY); }
-
-private:
-    Unit* mUnit;
-    int mX;
-    int mY;
-};
-</code></pre>
-<p>之前的输入处理程序仅维护单一的命令对象，并在对应按钮被按下时调用其execute()方法。但这里，命令将更加具体，这意味着每次玩家选择一个动作，输入处理程序代码都会创建一个命令实例：</p>
-<pre><code class="language-cpp">Command* handleInput()
-{
-    Unit* unit = getSelectedUnit();
-
-    if (isPressed(BUTTON_UP)) {
-        int destY = unit-&gt;y() - 1;
-        return new MoveUnitCmd(unit, unit-&gt;x(), destY);
-    }
-
-    if (isPressed(BUTTON_DOWN)) {
-        int destY = unit-&gt;y() + 1;
-        return new MoveUnitCmd(unit, unit-&gt;x(), destY);
-    }
-
-    /// #TODO: others moves . . .
-
-    return NULL;
-}
-</code></pre>
-<p>Command类新增undo方法：</p>
-<pre><code class="language-cpp">class Command
-{
-public:
-    virtual ~Command() {}
-    virtual void execute() = 0;
-    virtual void undo() = 0;
-}
-</code></pre>
-<p>进一步，修改上述子类，实现undo方法：</p>
-<pre><code class="language-cpp">class MoveUnitCmd : public Command
-{
-public:
-    MoveUnitCmd(Unit* unit, int x, int y)
-    : mUnit(unit), mX(x), mY(y),
-      xBefore(0), yBefore(0),
-    {}
-
-    virtual void execute()
-    {
-        // remember the unit's position before the move
-        xBefore = mUnit-&gt;x();
-        yBefore = mUnit-&gt;y();
-        mUnit-&gt;moveTo(mX, mY);
-    }
-
-    virtual undo()
-    {
-        mUnit-&gt;moveTo(xBefore, yBefore);
-    }
-
-private:
-    Unit* mUnit;
-    int mX, mY;
-    int xBefore, yBefore;
-}
-</code></pre>
-<p>更进一步，可以支持多次撤销。<br>
-具体思路是：不再只保存最后一个命令，而是维护一个命令列表和一个对当前命令的一个引用。当玩家执行了一个命令，就把该命令添加到这个列表，并将当前指针指向它。<br>
-当玩家选择undo时，我们撤销当前的命令并将当前指针移回去；当选择redo时，将当前指针移回去，然后从此处开始执行列表中的命令。如果撤销之后选择了一个新命令，则列表中位于当前命令之后的所有命令都被舍弃掉。</p>
-<blockquote>
-<p>References:<br>
-<a href="http://gameprogrammingpatterns.com/contents.html">Game Programming Patterns</a></p>
 </blockquote>
 ]]></content>
     </entry>
