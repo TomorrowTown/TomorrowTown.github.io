@@ -229,45 +229,168 @@
 </header>
         <div id="main">
             <div id="main-part">
-                <ul class="posts-list">
-                    <li class="lite-item">
-                        <article class="post post-type">
-                            <div class="post-main post-type-main">
-                                <div class="post-content">
-                                    <div class="post-content-real">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
+                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-04-golang-basics-channel-based-communication.png')"></div>
+                                
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言并发编程模型(四) -- 基于管道的通信
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            
-                                                <h3>
-                                                    2020
-                                                </h3>
-                                                
+                                                    </span>
+                                                    <span class="post-view">
                                                     
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-12-04-golang-basics-channel-based-communication/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(四) -- 基于管道的通信">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
 
-                                                        <article class="archive-item">
-                                                            <a class="archive-item-link" href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/">
-                                                                go服务器性能分析方法
-                                                            </a>
-                                                            <span class="archive-item-date">2020-11-05 </span>
-                                                        </article>
-                                                        
-                                                            
-                                                                
-                                    </div>
-                                    <div class="pagination-container">
-                                        
-                                                                
-                                                                        
-                                                                                
-                                    </div>
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            2.0分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-12-04</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <h2 id="0x00">0x00</h2>
+<p>依靠channel通信是不同goroutine之间同步的主要方法。</p>
+<h2 id="无缓冲channel">无缓冲channel</h2>
+<p>对于无缓冲channel而言，每一个发送操作(<strong>chan &lt;- x</strong>)都对应一个接收操作(<strong>&lt;- chan</strong>)，反之亦然。channel的发送和接收操作通常出现在不同的goroutine之间，如果放到同一个goroutine，则很容易出现死锁问题。<br>
+使用示例：</p>
+<pre><code class="language-Go">var done = make(chan bool)     // define an unbuffered channel, its len and cap always equal to 0
+var msg string
+
+func aGoroutine() {
+    msg = &quot;hello world&quot;
+    done &lt;- x   // sending operation, send a synchronization signal to channel
+    // or use close(done) to replace done &lt;- false
+}
+
+func main() {
+    go aGoroutine()
+    &lt;- done     // receiving operation, receive the corresponding synchronization signal
+    fmt.println(msg)
+}
+</code></pre>
+<h2 id="有缓冲channel">有缓冲channel</h2>
+<p>通过有缓冲channel的buffer大小，我们可以控制并发执行的goroutine的最大数量。例：</p>
+<pre><code class="language-Go">var limit = make(chan int, 3)   // the channel with cache, length can be 0, 1, 2 or 3, capacity equals to 3
+
+func main() {
+    for _, w := range workerThread {
+        go func() {
+            limit &lt;- 1
+            w()
+            &lt;- limit
+        }()
+        select{}    // empty pipeline selcetion statement, means that only the channel be nil, the main thread can excute return
+    }
+}
+</code></pre>
+<p>上述程序允许的最大并发数为3。</p>
+<blockquote>
+<p><strong>Summary：</strong></p>
+<ul>
+<li>无缓冲channel：如果线程A向channel进行写操作，线程B尚未对该channel进行读操作，那么A线程将会被阻塞在写操作语句。相应的，如果线程A对一个线程进行读操作，线程B尚未对channel进行写操作，那么A线程将会阻塞在读操作语句。</li>
+<li>有缓冲channel：只有当该channel的len==cap时，即该channel满了时，向该channel再进行写操作的化，写操作语句就会被阻塞。如果该channel中无数据(即len=0)，那么读该channel的语句将会被阻塞。</li>
+<li>无缓冲channel：实现线程间同步。</li>
+<li>有缓冲channel：线程间是异步的。</li>
+<li>注意：如果对channel的读和写操作在同一个线程中进行，那么很容易造成读写互相等待，即死锁。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+
                                 </div>
                             </div>
-                            <div class="post-footer">
-                                
-                                        
+                            
+                        </div>
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/" title="Go语言并发编程模型(四) -- 基于管道的通信">
+                                        https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/
+                                    </a><br> 协议: MIT License
                             </div>
-                        </article>
-                    </li>
-                </ul>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                    
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
+                    
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-07-golang-basics-producer-and-consumer-model/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(五) -- 生产者消费者模型
+                            </a>
+                        </div>
+                        
+                            
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/">
+                                        Go语言并发编程模型(三) -- 顺序一致性内存模型<i class="fa fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                
+                </div>
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/&sharesource=qzone&title=Go语言并发编程模型(四) -- 基于管道的通信&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607446893267&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/&sharesource=weibo&title=Go语言并发编程模型(四) -- 基于管道的通信 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267"><i class="fa fa-weibo "></i></a>
+                </span>
+                
+                                            
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
             <div id="sidebar">
     <ul>
@@ -408,6 +531,7 @@
     </ul>
 </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -472,5 +596,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>

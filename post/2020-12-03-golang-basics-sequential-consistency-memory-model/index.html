@@ -229,45 +229,174 @@
 </header>
         <div id="main">
             <div id="main-part">
-                <ul class="posts-list">
-                    <li class="lite-item">
-                        <article class="post post-type">
-                            <div class="post-main post-type-main">
-                                <div class="post-content">
-                                    <div class="post-content-real">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
+                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-03-golang-basics-sequential-consistency-memory-model.png')"></div>
+                                
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言并发编程模型(三) -- 顺序一致性内存模型
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            
-                                                <h3>
-                                                    2020
-                                                </h3>
-                                                
+                                                    </span>
+                                                    <span class="post-view">
                                                     
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-12-03-golang-basics-sequential-consistency-memory-model/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(三) -- 顺序一致性内存模型">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
 
-                                                        <article class="archive-item">
-                                                            <a class="archive-item-link" href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/">
-                                                                go服务器性能分析方法
-                                                            </a>
-                                                            <span class="archive-item-date">2020-11-05 </span>
-                                                        </article>
-                                                        
-                                                            
-                                                                
-                                    </div>
-                                    <div class="pagination-container">
-                                        
-                                                                
-                                                                        
-                                                                                
-                                    </div>
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            2.7分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-12-03</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <h2 id="0x00">0x00</h2>
+<p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
+<u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。<br>
+以下为一个顺序一致性内存模型：</p>
+<pre><code class="language-Go">var a string
+var done bool
+
+func set() {
+    a = &quot;hello world&quot;
+    done = true
+}
+
+func main() {
+    go set()
+    for !done {}
+    fmt.Println(a)
+}
+</code></pre>
+<p>在Go语言中，<u>在同一个goroutine内的内存顺序模型能够得到保证</u>(在本例中即：go set()中的a赋值语句一定先于done赋值语句执行)。但是在不同的goroutine中，内存模型的顺序就不能单纯地通过书写顺序去保证了。假如在main线程书写一个done赋值语句，那么就无法保证go set()协程的done赋值语句和main线程的done赋值语句谁先执行了，那么print出来的a就可能为空。<br>
+这是因为在Go中，<u>为了使并行最大化，go的编译器和处理器会对语句进行重排，同时CPU也可能会对指令集进行重排</u>。更糟糕的是，main线程可能无法察觉到set协程中的变量变化(可能始终在<a href="https://blog.csdn.net/yangyan1990/article/details/51078301">寄存器</a>内)，进而导致main线程死循环。如果并发程序不能确定事件发生的顺序，那么输出的结果也是不确定的，如以下这个程序：</p>
+<pre><code class="language-Go">func main() {
+    go fmt.Println(&quot;hello world&quot;)
+}
+</code></pre>
+<p>由于goroutine和return事件是并发的，这两个事件谁都可能先发生，最终是否能打印出hello world也是无法确定的。</p>
+<h2 id="使用同步原语进行同步">使用同步原语进行同步</h2>
+<pre><code class="language-Go">func main() {
+    done := make(chan int)
+    go func() {
+        fmt.Println(&quot;111&quot;)
+        done &lt;- 1       // 同步语句 1
+    }()
+    &lt;- done              // 同步语句2
+     fmt.Println(&quot;222&quot;)
+}
+</code></pre>
+<p>done &lt;- 1：向channel传值；&lt;- done：从channel取值。<br>
+<u>向channel传值取值先写谁都无所谓，因为传了没人取，和想取没人传，都会使channel阻塞</u>，<br>
+因此同步语句2能够顺利执行(不阻塞)，就意味着同步语句1肯定执行了，又因为在一个goroutine中总能保证顺序一致性内存，因此在语句1执行之前，&quot;111&quot;肯定打印了，因此总能保证先打印&quot;111&quot;，再打印&quot;222&quot;。</p>
+<h2 id="使用互斥量实现同步">使用互斥量实现同步</h2>
+<pre><code class="language-Go">func main() {
+    var mu sync.Mutex
+    mu.Lock()
+    go func() {
+        fmt.Println(&quot;hello world&quot;)
+        mu.Unlock()
+    }()
+
+    mu.Lock()
+}
+</code></pre>
+<p>一个goroutine内的语句能够保证顺序一致性内存，所以打印语句必发生在Unlock()之前；在main线程中，先执行了第一个Lock()，那么通过sync.Mutex内部的保证，第二个Lock()必发生在goroutine中的Unlock()之后。因此能够保证该程序正常输出hello world。</p>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+
                                 </div>
                             </div>
-                            <div class="post-footer">
-                                
-                                        
+                            
+                        </div>
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/" title="Go语言并发编程模型(三) -- 顺序一致性内存模型">
+                                        https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/
+                                    </a><br> 协议: MIT License
                             </div>
-                        </article>
-                    </li>
-                </ul>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                    
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
+                    
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(四) -- 基于管道的通信
+                            </a>
+                        </div>
+                        
+                            
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/">
+                                        Go语言并发编程模型(二) -- 原子操作<i class="fa fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                
+                </div>
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/&sharesource=qzone&title=Go语言并发编程模型(三) -- 顺序一致性内存模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607446893267&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/&sharesource=weibo&title=Go语言并发编程模型(三) -- 顺序一致性内存模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267"><i class="fa fa-weibo "></i></a>
+                </span>
+                
+                                            
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
             <div id="sidebar">
     <ul>
@@ -408,6 +537,7 @@
     </ul>
 </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -472,5 +602,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>

@@ -229,45 +229,253 @@
 </header>
         <div id="main">
             <div id="main-part">
-                <ul class="posts-list">
-                    <li class="lite-item">
-                        <article class="post post-type">
-                            <div class="post-main post-type-main">
-                                <div class="post-content">
-                                    <div class="post-content-real">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
+                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-08-golang-basics-publish-and-subscribe-model.png')"></div>
+                                
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言并发编程模型(六) -- 发布订阅模型
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            
-                                                <h3>
-                                                    2020
-                                                </h3>
-                                                
+                                                    </span>
+                                                    <span class="post-view">
                                                     
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-12-08-golang-basics-publish-and-subscribe-model/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(六) -- 发布订阅模型">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
 
-                                                        <article class="archive-item">
-                                                            <a class="archive-item-link" href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/">
-                                                                go服务器性能分析方法
-                                                            </a>
-                                                            <span class="archive-item-date">2020-11-05 </span>
-                                                        </article>
-                                                        
-                                                            
-                                                                
-                                    </div>
-                                    <div class="pagination-container">
-                                        
-                                                                
-                                                                        
-                                                                                
-                                    </div>
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            3.0分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-12-08</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <h2 id="0x00">0x00</h2>
+<p>相比于生产者消费者模型而言，消息的生产者在发布订阅模型中充当了消息的发布者(publisher)，消息的消费者充当了消息的订阅者(subscriber)。<br>
+在传统的生产者消费者模型中，消息被发送到一个队列中，而在发布订阅模型中，消息被发布给一个主题(topic)。<br>
+在发布订阅模型中，每一个消息都被传递给多个订阅者。发布者通常不知道也不关心哪个订阅者收到了主题消息。发布者和订阅者可以在运行时动态地添加，是一种松散的耦合关系，这使得系统地复杂性会随着时间的推移而增长。</p>
+<h2 id="一个支持多主题的pub-sub库的简易实现">一个支持多主题的pub-sub库的简易实现</h2>
+<pre><code class="language-Go">package main
+
+import (
+	&quot;fmt&quot;
+	&quot;strings&quot;
+	&quot;sync&quot;
+	&quot;time&quot;
+)
+
+type (
+	// subscriber is a channel
+	subscriber chan interface{}
+	topicFunc  func(v interface{}) bool
+)
+
+// the publisher object
+type Publisher struct {
+	m               sync.RWMutex
+	buffer          int                         // the cache size of subscription queue
+	timeout         time.Duration               // publish timeout
+	subscribers     map[subscriber]topicFunc    // subscriber information
+}
+
+func NewPublisher(timeout time.Duration, buffer int) *Publisher {
+	return &amp;Publisher {
+		buffer:       buffer,
+		timeout:      timeout,
+		subscribers:  make(map[subscriber]topicFunc),
+	}
+}
+
+// add a new subscriber, subscribes all topic
+func (p *Publisher) Subscribe() chan interface{} {
+	return p.SubscribeTopic(nil)
+}
+
+// add a new subscriber, subscribes the topic filtrated by filter
+func (p *Publisher) SubscribeTopic(topic topicFunc) chan interface{} {
+	ch := make(chan interface{}, p.buffer)
+	p.m.Lock()
+	p.subscribers[ch] = topic
+	p.m.Unlock()
+	return ch
+}
+
+func (p *Publisher) Exit(sub chan interface{}) {
+	p.m.Lock()
+	defer p.m.Unlock()
+
+	delete(p.subscribers, sub)
+	close(sub)
+}
+
+// publish a topic
+func (p *Publisher) Publish(v interface{}) {
+	p.m.RLock()
+	defer p.m.RUnlock()
+
+	var wg sync.WaitGroup
+	for sub, topic := range p.subscribers {
+		wg.Add(1)
+		go p.SendTopic(sub, topic, v, &amp;wg)
+	}
+    // wait for all goroutines excute finish
+	wg.Wait()
+}
+
+// close publisher object, at the same time, close all the channel of subscribers
+func (p *Publisher) Close() {
+	p.m.Lock()
+	defer p.m.Unlock()
+
+	for sub := range p.subscribers {
+		delete(p.subscribers, sub)
+		close(sub)
+	}
+}
+
+// send topic, can tolerate a certain timeout
+func (p *Publisher) SendTopic(sub subscriber, topic topicFunc, v interface{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if topic != nil &amp;&amp; !topic(v) {
+		return
+	}
+	select {
+	case sub &lt;- v:
+		// ......
+	case &lt;- time.After(p.timeout):
+		// ......
+	}
+}
+
+// test code ...
+func main() {
+	p := NewPublisher(time.Millisecond * 100, 10)
+	defer p.Close()
+
+	all := p.Subscribe()
+	gTopic := p.SubscribeTopic(func(v interface{}) bool {
+		if s, ok := v.(string); ok {
+			return strings.Contains(s, &quot;golang&quot;)
+		}
+		return false
+	})
+
+	// pub
+	p.Publish(&quot;hello world!&quot;)
+	p.Publish(&quot;hello golang!&quot;)
+
+	// sub
+	go func() {
+		for msg := range all {
+			fmt.Println(&quot;all: &quot;, msg)
+		}
+	}()
+
+	go func() {
+		for msg := range gTopic {
+			fmt.Println(&quot;golang: &quot;, msg)
+		}
+	}()
+
+	// exit after a certain time
+	time.Sleep(time.Second * 3)
+}
+</code></pre>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+
                                 </div>
                             </div>
-                            <div class="post-footer">
-                                
-                                        
+                            
+                        </div>
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/" title="Go语言并发编程模型(六) -- 发布订阅模型">
+                                        https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/
+                                    </a><br> 协议: MIT License
                             </div>
-                        </article>
-                    </li>
-                </ul>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                    
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
+                    
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-09-golang-basics-control-the-number-of-concurrent/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(七) -- 控制并发数
+                            </a>
+                        </div>
+                        
+                            
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-12-07-golang-basics-producer-and-consumer-model/">
+                                        Go语言并发编程模型(五) -- 生产者消费者模型<i class="fa fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                
+                </div>
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/&sharesource=qzone&title=Go语言并发编程模型(六) -- 发布订阅模型&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607446893267&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/&sharesource=weibo&title=Go语言并发编程模型(六) -- 发布订阅模型 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267"><i class="fa fa-weibo "></i></a>
+                </span>
+                
+                                            
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
             <div id="sidebar">
     <ul>
@@ -408,6 +616,7 @@
     </ul>
 </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -472,5 +681,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>

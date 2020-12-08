@@ -229,45 +229,269 @@
 </header>
         <div id="main">
             <div id="main-part">
-                <ul class="posts-list">
-                    <li class="lite-item">
-                        <article class="post post-type">
-                            <div class="post-main post-type-main">
-                                <div class="post-content">
-                                    <div class="post-content-real">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
+                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-02-golang-basics-atomic-operation.png')"></div>
+                                
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言并发编程模型(二) -- 原子操作
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            
-                                                <h3>
-                                                    2020
-                                                </h3>
-                                                
+                                                    </span>
+                                                    <span class="post-view">
                                                     
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-12-02-golang-basics-atomic-operation/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(二) -- 原子操作">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
 
-                                                        <article class="archive-item">
-                                                            <a class="archive-item-link" href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/">
-                                                                go服务器性能分析方法
-                                                            </a>
-                                                            <span class="archive-item-date">2020-11-05 </span>
-                                                        </article>
-                                                        
-                                                            
-                                                                
-                                    </div>
-                                    <div class="pagination-container">
-                                        
-                                                                
-                                                                        
-                                                                                
-                                    </div>
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            3.1分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-12-02</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <h2 id="使用互斥锁实现原子操作">使用互斥锁实现原子操作</h2>
+<p>通常，原子操作由“互斥”访问保证，通常由特殊的CPU指令保护。当然，如果只是想模拟粗粒度的原子操作，我们可以使用<strong>sync.Mutex</strong>来做到这一点。</p>
+<pre><code class="language-Go">package main
+
+import (
+    &quot;sync&quot;
+    &quot;fmt&quot;
+)
+
+var total struct {
+    sync.Mutex
+    value int
+}
+
+func worker(wg *sync.WaitGroup) {
+    defer wg.Done()
+    for i := 0; i &lt; 100; i++ {
+        total.Lock()
+        total.value += 1
+        total.Unlock()
+    }
+}
+
+func main() {
+    var wg sync.WaitGroup
+    wg.Add(2)
+    go worker(&amp;wg)
+    go worker(&amp;wg)
+    wg.Wait()
+
+    fmt.Println(total.value)    // 10100
+}
+</code></pre>
+<h2 id="使用syncatomic实现原子操作">使用sync/atomic实现原子操作</h2>
+<p>如上，使用互斥锁去保护数字共享资源既麻烦又低效。标准库中的<strong>sync/atomic</strong>包对此提供了丰富的支持。利用此包重新实现上面的例子：</p>
+<pre><code class="language-Go">package main
+
+import (
+    &quot;sync&quot;
+    &quot;sync/atomic&quot;
+    &quot;fmt&quot;
+)
+
+var total uint64
+
+func worker(wg *sync.WaitGroup) {
+    defer wg.Done()
+    for i := 0; i &lt;= 100; i++ {
+        atomic.AddUnit64(&amp;total, i)
+    }
+}
+
+func main() {
+    var wg sync.WaitGroup
+    wg.Add(2)
+    go worker(&amp;wg)
+    go worker(&amp;wg)
+    wg.Wait()
+
+    fmt.Println(total.value)    // 10100
+}
+</code></pre>
+<h2 id="利用原子操作和互斥锁实现单例">利用原子操作和互斥锁实现单例</h2>
+<p>原子操作和互斥锁可以实现非常高效的单例模式。互斥锁的开销比普通整数的原子读写要高得多。 在性能敏感的地方可以增加一个数字型的标志位，通过原子检测标志位状态降低互斥锁的使用次数来提高性能。</p>
+<pre><code class="language-Go">type singleton struct {}
+
+var (
+    instance    *singleton
+    initialized   uint32
+    mu              sync.Mutex
+)
+
+func GetInst() *singleton {
+    if atomic.LoadUint32(&amp;initialized) == 1 {
+        return instance
+    }
+
+    mu.Lock()
+    defer mu.Unlock()
+
+    if instance == nil {
+        defer atomic.StoreUint32(&amp;initialized, 1)
+        instance = &amp;singleton {}
+    }
+
+    return instance
+}
+</code></pre>
+<p>将上例中的公共部分提取出来就是标准库中的 <strong>sync.Once</strong>包。<strong>sync.Once</strong>源码如下所示：</p>
+<pre><code class="language-Go">type Once struct {
+    m      mutex
+    done uint32
+}
+
+func (o *Once) Do(f func()) {
+    if atomic.LoadUint32(&amp;o.Done) == 1 {
+        return
+    }
+    o.m.Lock()
+    defer o.m.Unlock()
+
+    if o.done == 0 {
+        defer atomic.StoreUint32(&amp;o.done, 1)
+        f()
+    }
+}
+</code></pre>
+<p>现在，基于<strong>sync.Once</strong>重新实现单例模式：</p>
+<pre><code class="language-Go">var (
+    instance    *singleton
+    once          sync.Once
+)
+
+func GetInst() *singleton {
+    once.Do(func() {
+        instance = &amp;singleton{}
+    })
+    return instance
+}
+</code></pre>
+<h2 id="load-store">Load &amp; Store</h2>
+<p><strong>atomic.Value</strong>对象提供了<strong>Load</strong>和<strong>Store</strong>两种方法，用于加载和保存数据。其返回值和参数均为**interface{}**类型，所以这两种方法可以用于自定义的任何复杂结构。</p>
+<pre><code class="language-Go">/* This is a simplified producer-consumer model: back-end thread generate the latest configuration; multiple worker threads in the front-end get the latest configuration. All threads share configuration resources. */
+
+// save the current configuration
+var conf atomic.Value
+
+// initialize the configuration
+conf.Store(loadConfig())
+
+// start a backend thread, load the updated configuration
+go func() {
+    for {
+        time.Sleep(time.Second)
+        conf.Store(loadConfig())
+    }
+}
+
+// the worker threads used to process requests, always use the latest configuration
+for i := 0; i &lt; 10; i++ {
+    go func() {
+        for r := range requests() {
+            c := conf.Load()
+        }
+    }()
+}
+</code></pre>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+
                                 </div>
                             </div>
-                            <div class="post-footer">
-                                
-                                        
+                            
+                        </div>
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/" title="Go语言并发编程模型(二) -- 原子操作">
+                                        https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/
+                                    </a><br> 协议: MIT License
                             </div>
-                        </article>
-                    </li>
-                </ul>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                    
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
+                    
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(三) -- 顺序一致性内存模型
+                            </a>
+                        </div>
+                        
+                            
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/">
+                                        Go语言并发编程模型(一) -- 开篇<i class="fa fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                
+                </div>
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/&sharesource=qzone&title=Go语言并发编程模型(二) -- 原子操作&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607446893267&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/&sharesource=weibo&title=Go语言并发编程模型(二) -- 原子操作 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267"><i class="fa fa-weibo "></i></a>
+                </span>
+                
+                                            
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
             <div id="sidebar">
     <ul>
@@ -408,6 +632,7 @@
     </ul>
 </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -472,5 +697,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://TomorrowTown.github.io</id>
     <title>tomorrow</title>
-    <updated>2020-12-08T16:47:25.861Z</updated>
+    <updated>2020-12-08T17:01:44.567Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://TomorrowTown.github.io"/>
     <link rel="self" href="https://TomorrowTown.github.io/atom.xml"/>
@@ -12,10 +12,10 @@
     <rights>All rights reserved 2020, tomorrow</rights>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(九) -- context]]></title>
-        <id>https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/</id>
-        <link href="https://TomorrowTown.github.io/post/2020-12-9-go-basic-context/">
+        <id>https://TomorrowTown.github.io/post/2020-12-9-golang-basics-context/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-9-golang-basics-context/">
         </link>
-        <updated>2020-11-29T15:56:28.000Z</updated>
+        <updated>2020-12-09T15:56:28.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
 <p>在Go1.7发布时，标准库增加了一个<strong>context</strong>包，用来简化对于处理单个请求的多个goroutine之间与请求域的数据、超时和退出等操作。</p>
 <h2 id="context包的应用">context包的应用</h2>
@@ -92,10 +92,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(八) -- 并发的安全退出]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-shi-yi-bing-fa-de-an-quan-tui-chu/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-shi-yi-bing-fa-de-an-quan-tui-chu/">
+        <id>https://TomorrowTown.github.io/post/2020-12-09-golang-basics-concurrent-exit-safely/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-09-golang-basics-concurrent-exit-safely/">
         </link>
-        <updated>2020-11-29T15:55:41.000Z</updated>
+        <updated>2020-12-09T15:55:41.000Z</updated>
         <content type="html"><![CDATA[<h1 id="0x00">0x00</h1>
 <p>当<strong>select</strong>有许多分支时，会随机选择一个可用的channel分支，若没有可用channel分支，则<strong>default</strong>分支将会被选择，否则会一直保持阻塞状态。</p>
 <h2 id="select语句的应用">select语句的应用</h2>
@@ -198,10 +198,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(七) -- 控制并发数]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-jiu-kong-zhi-bing-fa-shu/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-jiu-kong-zhi-bing-fa-shu/">
+        <id>https://TomorrowTown.github.io/post/2020-12-09-golang-basics-control-the-number-of-concurrent/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-09-golang-basics-control-the-number-of-concurrent/">
         </link>
-        <updated>2020-11-29T15:52:58.000Z</updated>
+        <updated>2020-12-09T15:52:58.000Z</updated>
         <content type="html"><![CDATA[<h2 id="控制并发数的意义">控制并发数的意义</h2>
 <p>适当地控制并发数，能够为其他程序提供可供使用的CPU资源，也可以节省能耗。<br>
 对于细粒度的并发程序而言，CSP模型中的消息传递机制的开销是非常大的(多线程并发模型不可避免地会面对线程启动的开销)。</p>
@@ -244,10 +244,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(六) -- 发布订阅模型]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-ba-fa-bu-ding-yue-mo-xing/">
+        <id>https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-08-golang-basics-publish-and-subscribe-model/">
         </link>
-        <updated>2020-11-29T15:52:10.000Z</updated>
+        <updated>2020-12-08T15:52:10.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
 <p>相比于生产者消费者模型而言，消息的生产者在发布订阅模型中充当了消息的发布者(publisher)，消息的消费者充当了消息的订阅者(subscriber)。<br>
 在传统的生产者消费者模型中，消息被发送到一个队列中，而在发布订阅模型中，消息被发布给一个主题(topic)。<br>
@@ -387,10 +387,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(五) -- 生产者消费者模型]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-qi-sheng-chan-zhe-xiao-fei-zhe-mo-xing/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-qi-sheng-chan-zhe-xiao-fei-zhe-mo-xing/">
+        <id>https://TomorrowTown.github.io/post/2020-12-07-golang-basics-producer-and-consumer-model/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-07-golang-basics-producer-and-consumer-model/">
         </link>
-        <updated>2020-11-29T15:51:39.000Z</updated>
+        <updated>2020-12-07T15:51:39.000Z</updated>
         <content type="html"><![CDATA[<p><strong>talk is cheap, show you the code:</strong></p>
 <pre><code class="language-Go">// producer: generate a sequence of multiples of factor
 func Producer(factor int, out chan &lt;- int) {
@@ -435,10 +435,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(四) -- 基于管道的通信]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-si-ji-yu-guan-dao-de-tong-xin/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-si-ji-yu-guan-dao-de-tong-xin/">
+        <id>https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-04-golang-basics-channel-based-communication/">
         </link>
-        <updated>2020-11-29T15:47:37.000Z</updated>
+        <updated>2020-12-04T15:47:37.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
 <p>依靠channel通信是不同goroutine之间同步的主要方法。</p>
 <h2 id="无缓冲channel">无缓冲channel</h2>
@@ -493,10 +493,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(三) -- 顺序一致性内存模型]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-san-shun-xu-yi-zhi-xing-nei-cun-mo-xing/">
+        <id>https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-03-golang-basics-sequential-consistency-memory-model/">
         </link>
-        <updated>2020-11-29T15:47:13.000Z</updated>
+        <updated>2020-12-03T15:47:13.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
 <p>原子操作能够为线程之间的数据同步提供部分保证的前提是<strong>顺序一致性内存模型</strong>。<br>
 <u><strong>线程间同步的本质就是为并发的事件进行排序</strong></u>。<br>
@@ -557,10 +557,10 @@ func main() {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(二) -- 原子操作]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-er-yuan-zi-cao-zuo/">
+        <id>https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/">
         </link>
-        <updated>2020-11-29T15:46:13.000Z</updated>
+        <updated>2020-12-02T15:46:13.000Z</updated>
         <content type="html"><![CDATA[<h2 id="使用互斥锁实现原子操作">使用互斥锁实现原子操作</h2>
 <p>通常，原子操作由“互斥”访问保证，通常由特殊的CPU指令保护。当然，如果只是想模拟粗粒度的原子操作，我们可以使用<strong>sync.Mutex</strong>来做到这一点。</p>
 <pre><code class="language-Go">package main
@@ -716,8 +716,8 @@ for i := 0; i &lt; 10; i++ {
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言并发编程模型(一) -- 开篇]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-bing-fa-bian-cheng-mo-xing-yi-kai-pian/">
+        <id>https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/">
         </link>
         <updated>2020-11-29T15:17:26.000Z</updated>
         <content type="html"><![CDATA[<h2 id="0x00">0x00</h2>
@@ -748,8 +748,8 @@ Golang并发编程的slogan：</p>
     </entry>
     <entry>
         <title type="html"><![CDATA[Go语言基础(二) -- string]]></title>
-        <id>https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/</id>
-        <link href="https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-er-zi-fu-chuan/">
+        <id>https://TomorrowTown.github.io/post/2020-11-29-golang-basics-string/</id>
+        <link href="https://TomorrowTown.github.io/post/2020-11-29-golang-basics-string/">
         </link>
         <updated>2020-11-29T13:48:29.000Z</updated>
         <content type="html"><![CDATA[<p>与数组不同，字符串中的元素是不可修改的，字符串是一个<strong>只读</strong>字节数组。<u>虽然字符串的长度一旦固定就不可修改，但长度并不是字符串类型的一部分</u>。<br>

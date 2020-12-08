@@ -229,45 +229,144 @@
 </header>
         <div id="main">
             <div id="main-part">
-                <ul class="posts-list">
-                    <li class="lite-item">
-                        <article class="post post-type">
-                            <div class="post-main post-type-main">
-                                <div class="post-content">
-                                    <div class="post-content-real">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
+                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-01-golang-basics-introductory-remarks.png')"></div>
+                                
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言并发编程模型(一) -- 开篇
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            
-                                                <h3>
-                                                    2020
-                                                </h3>
+                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/lXXd7xbfA/'">golang</span>
                                                 
+                                                    </span>
+                                                    <span class="post-view">
                                                     
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-12-01-golang-basics-introductory-remarks/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(一) -- 开篇">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
 
-                                                        <article class="archive-item">
-                                                            <a class="archive-item-link" href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/">
-                                                                go服务器性能分析方法
-                                                            </a>
-                                                            <span class="archive-item-date">2020-11-05 </span>
-                                                        </article>
-                                                        
-                                                            
-                                                                
-                                    </div>
-                                    <div class="pagination-container">
-                                        
-                                                                
-                                                                        
-                                                                                
-                                    </div>
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            2.7分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <h2 id="0x00">0x00</h2>
+<p>首先看一下并发与并行的区别：<br>
+并发：注意力更多地集中于设计层面，并发程序能够被顺序执行；<br>
+并行：注意力更多地集中于运行层面，并发程序一般是大量简单重复的运算。<br>
+在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
+在并发编程中，对资源的精确访问需要精确的控制。在大多数语言中，这个困难的问题是通过锁和其他同步解决方案来解决的。但在golang中有另一种方式，它将共享的值通过channel传递。在任何时刻，最好只有一个goroutine可以拥有该资源。数据竞争在设计层面被消除。<br>
+常用的并发编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。<br>
+Golang并发编程的slogan：</p>
+<blockquote>
+<p>Do not communicate by sharing memory; instead, share memory by communicating.</p>
+</blockquote>
+<h2 id="go协程与系统线程">go协程与系统线程</h2>
+<p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
+<h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
+<p>go协程与系统线程的差别只是一个变量，但正是这个变量的区别导致了go并发编程的质的飞跃。<br>
+**系统级线程：**具有固定的栈大小(通常默认是2MB)，该栈主要用于在递归调用函数时保存参数和局部变量。固定栈大小会导致两个问题：一是对许多只需要少量栈空间的线程来说是一种巨大的浪费；二是需要大量栈空间的线程会面临栈溢出的风险。<br>
+**go协程：**goroutine以一个非常小的栈启动，栈大小不固定，可动态伸缩(最多为1GB)。因此启动成本非常小，所以可以启动成千上万个goroutine。</p>
+<h3 id="goroutine的调度器">goroutine的调度器</h3>
+<p>goroutine采用半抢占式的协作调度，只有在当前goroutine被阻塞时才会导致调度。同时，它发生在用户模式下。调度器会根据具体函数只保存必要的寄存器，切换成本远低于系统线程。运行时有一个<strong>runtime.GOMAXPROCS</strong>变量，用于控制当前运行正常非阻塞Goroutine的系统线程数。<br>
+关于goroutine的调度器的详细说明请参阅：&lt;(https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/&gt;</p>
+<blockquote>
+<p>References:<br>
+<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
+</blockquote>
+
                                 </div>
                             </div>
-                            <div class="post-footer">
-                                
-                                        
+                            
+                        </div>
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/" title="Go语言并发编程模型(一) -- 开篇">
+                                        https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/
+                                    </a><br> 协议: MIT License
                             </div>
-                        </article>
-                    </li>
-                </ul>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                    
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
+                    
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(二) -- 原子操作
+                            </a>
+                        </div>
+                        
+                            
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-11-29-golang-basics-string/">
+                                        Go语言基础(二) -- string<i class="fa fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                
+                </div>
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1607446893267&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1607446893267"><i class="fa fa-weibo "></i></a>
+                </span>
+                
+                                            
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
             <div id="sidebar">
     <ul>
@@ -408,6 +507,7 @@
     </ul>
 </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -472,5 +572,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>
