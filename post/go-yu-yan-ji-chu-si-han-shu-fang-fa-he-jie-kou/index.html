@@ -233,22 +233,20 @@
                     <article class="post post-type real-post">
                         <header class="post-type-header">
                             
-                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-11-12-golang-basics-array.png')"></div>
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou.png')"></div>
                                 
                                         <div class="thumbnail-shadow">
                                             <h1 class="post-title">
-                                                Go语言基础(一) -- array
+                                                Go语言基础(四) -- 函数、方法和接口
                                             </h1>
                                             <div class="post-info">
                                                 <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/lXXd7xbfA/'">golang</span>
-                                                
                                                     </span>
                                                     <span class="post-view">
                                                     
                                                         &nbsp;•&nbsp;
-                                                    <span id="/post/2020-11-12-golang-basics-array/" class="leancloud_visitors" data-flag-title="Go语言基础(一) -- array">
+                                                    <span id="/post/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou/" class="leancloud_visitors" data-flag-title="Go语言基础(四) -- 函数、方法和接口">
                                                 <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
                                                 <i class="leancloud-visitors-count">0</i>
                                             </span>
@@ -257,100 +255,332 @@
                                                             </span>&nbsp;•&nbsp;
 
                                                             <span class="post-readtime">阅读时间:
-                                            4.2分</span>
+                                            17.5分</span>
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
                                             <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1610129458508" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1610129458508" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
-                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-12</span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
                                         </div>
                         </header>
                         <div class="post-main post-type-main">
                             <div class="post-content">
                                 <div class="post-content-real">
-                                    <p>数组是一种固定长度的序列，可包含0个或多个元素。值得注意的是，<u>长度也是决定数组类型的因素。数组由不同长度或不同类型的数据组成，那么这些数组就是不同的类型，是不能直接赋值的</u>。因此在实际的golang项目中很少使用数组。对应于数组的类型是slice，slice是一种可以动态增长和收缩的序列，本章暂且不表。</p>
-<pre><code class="language-Go">var a [3]int                        // define an int-type array of length 3, all the elements are 0
-var b = [...]int{1, 2, 3}           // define an int-type array of length 3, elements are 1, 2, 3
-var c = [...]int{2: 3, 1: 2}        // define an int-type of length 3, elements are 0, 2, 3
-var d = [...]int{1, 2, 4: 5, 6}     // define an int-type of length 3, elements are 1, 2, 0, 0, 5, 6, 
+                                    <p>懒，所以还是贴笔记</p>
+<h2 id="0x00">0x00</h2>
+<p>There are named and anonymous functions in Go: named function generally correspond to package-level functions, which is a special case of anonymous function. When an anonymous function refers to a variable in an external scope, it becomes a closure function. Closure functions are the core of functional programming languages. Method(it is a kind of function) is special functions bound to a specific type. Method in Go are dependent on types and must be statically bound at compile time. The interface defines a set of methods, these methods rely on the interface object at runtime, so the corresponding method of the interface is dynamically bound at runtime. Go language implements duck object-oriented model through implicit interface mechanism.</p>
+<p><em>Feature 1-11 Package initial process</em><br>
+It should be noted that before the <strong>main.main</strong> function is executed, <u>all code runs in the same goroutine</u>, which is the main system thread of the program. Therefore, if a new goroutine is started with the <strong>go</strong> keyword inside an init function, the new goroutine may only be executed <u>after entering the <strong>main.main</strong> function.</u><br>
+<img src="https://TomorrowTown.github.io/post-images/1610129341485.png" alt="" loading="lazy"></p>
+<h2 id="131-function">1.3.1 Function</h2>
+<p>In Go, function is <u>first-class object</u>, and we can keep function in variables. Functions are mainly divided into <u>named and anonymous</u>. Package-level functions are generally named functions. Named functions are a special case of anonymous functions</p>
+<pre><code class="language-Go">// named function
+func Add(a, b int) int {
+    return a + b
+}
 
+// anonymous function
+var Add = func(a, b int) int {
+    return a + b
+}
+</code></pre>
+<p>Functions in Go language can have multiple parameters and multiple return values. Both parameters and return values exchange data with the callee <u>by value</u>. Syntactically, the function also supports a variable number of parameters. The variable number of parameters <u>must be the last parameter.</u> The variable number of parameters is actually a <u>slice type parameter.</u></p>
+<p>When the variable parameter is an empty interface type, whether the caller unpacks the variable parameter will cause different results:</p>
+<pre><code class="language-Go">func main() {
+    var a = []interface{}{123, &quot;abc&quot;}
+
+    Print(a...) // 123 abc
+    Print(a)    // [123 abc]
+}
+
+func Print(a ...interface{}) {
+    fmt.Println(a...)
+}
+</code></pre>
+<p>You can modify the return value by name, or you can modify the return value <u>after the return</u> statement through the <strong>defer</strong> statement:</p>
+<pre><code class="language-Go">func Inc() (v int) {
+    defer func() {v++} ()
+    return 42
+}
 /*
-值得注意的是第三种和第四种方法去定义一个数组。
-第三种方法：golang支持数组中的元素通过索引去初始化，因此初始化时不必按照索引从0开始递增的方式去初始化。数组的长度基于初始化时出现的最大索引，未显式初始化的元素仍然使用0值初始化。
-第四种方法：混合了第四种和第三种初始化方法。
+finally, v will equals to 43
 */
 </code></pre>
-<p><em>内存结构：</em><br>
-<img src="https://TomorrowTown.github.io/post-images/1605189729922.png" alt="" loading="lazy"></p>
-<p>golang中的数组是<a href="https://www.jianshu.com/p/8ca5ef5867cc">值语义</a>的。<u>一个数组变量代表的是整个数组，不像C++，代表的是数组第一个元素的指针</u>。当一个数组被赋值或是被传递，整个数组其实是被拷贝的，修改拷贝的数组并不会改变原数组的数据，因为他们并不共享底层数据结构。<br>
-如果数组很大，那么数组分配也会有很大的开销。为了避免复制数组的开销，可以传递一个指向数组的指针，但数组指针不是数组。</p>
-<pre><code class="language-Go">var a = [...]int{1, 2, 3}
-var b = &amp;a
+<p>Among them, the <strong>defer</strong> statement delays the execution of an anonymous function, because this anonymous function captures the local variable v of the external function. Closures <u>do not access captured external variables by value, but by reference.</u></p>
+<p>The behavior of accessing external variables by this reference method of closures may cause some hidden problems:</p>
+<pre><code class="language-Go">func main() {
+    for i := 0; i &lt; 3; i++ {
+        defer func(){ println(i) } ()
+    }
+}
+// Output:
+// 3
+// 3
+// 3
+</code></pre>
+<p>Because it is a closure, in the for iteration statement, each defer statement delays the execution of a function that <u>references the same i iteration variable.</u> This variable has a value of 3 after the loop ends, so the final output is 3.</p>
+<p>The idea of the repair is to generate unique variables for each defer function in each iteration. You can use the following two methods(Generally speaking, it is not a good habit to execute defer statements inside a <strong>for</strong> loop. This is only an example and is not recommended):</p>
+<pre><code class="language-Go">func main() {
+    for i := 0; i &lt; 3; i++ {
+        /*define a local variable i in a loop, In this way, 
+        the closure function of each iteration of the defer statement captures different variables
+        */ 
+       i := i
+       defer func(){ println(i) } ()
+    }
+}
 
-fmt.Println(a[0], a[1])     // Prints the first two elements of the array
-fmt.Println(b[0], b[1])     // Accessing array elements through array pointer is similar to arrays
-
-// Iterate through the elements of an array through array pointer.
-for i, v = range b {
-    ......
+func main() {
+    for i := 0; i &lt; 3; i++ {
+        // pass in i through the function
+        // the defer statement will immediately evaluate the call parameters
+        defer func(i int){ println(i) } (i)
+    }
 }
 </code></pre>
-<h2 id="遍历数组的常用方法">遍历数组的常用方法</h2>
-<pre><code class="language-Go">for i := range a {
+<p>The elements of the incoming slice can be modified inside the called function, which seems to violate the principle of passing parameter values to function of Go. In fact, any situation in which the call parameters can be modified through function parameters is because the function parameters have <u>explicit or implicit incoming pointer parameters</u>. The specification of the function parameter passing value is more accurately <u>only for the fixed part of the data structure,</u> such as the pointer in the corresponding structure of the string or slice and the value of the string length structure, but does not contain the <u>content pointed by the pointer indirectly.</u><br>
+Replace the slice type parameters with a structure similar to <strong>reflect.SliceHeader</strong> to understand the meaning of slice pass value:</p>
+<pre><code class="language-Go">func twice(x []int) {
+    for i := range x {
+        x[i] *= 2
+    }
 }
-for i, v := range a {
-}
-for i := 0 ; i &lt; len(a); i++ {
-}
-</code></pre>
-<p>需要注意的是，使用<strong>for range</strong>的方式进行遍历，其性能要比传统的**for i := 0 ; i &lt; len(a); i++ **要差很多。具体原因请查看：<a href="https://www.flysnow.org/2018/10/20/golang-for-range-slice-map.html">https://www.flysnow.org/2018/10/20/golang-for-range-slice-map.html</a></p>
-<h2 id="数组的其他用途">数组的其他用途</h2>
-<p>数组不仅可以用于数字类型，还可以是字符串数组，结构体数组，函数数组，接口数组，管道数组等等：</p>
-<pre><code class="language-Go">// string array
-var s1 = [...]string{&quot;hello&quot;, &quot;world&quot;}
 
-// structure array
-var line = [...]image.point{{0, 0}, {1, 1}}
-
-// function array
-var decoder = [...]func(io.Reader) (image.Image, error) {
-    png.Decode,
-    jpeg.Decode,
+type IntSliceHeader struct {
+    Data []int
+    Len  int
+    Cap  int
 }
-// interface array
-var unknown = [...]interface{}{123, &quot;hello&quot;}
 
-// pipe array
-var chanList = [2]chan int{}
+func twice(x IntSliceHeader) {
+    for i := 0; i &lt; x.Len; i++ {
+        x.Data[i] *= 2
+    }
+}
 </code></pre>
-<p>也可以定义空数组：</p>
-<pre><code class="language-Go">var d = [0]int
-var e = [0]int{}
-var f = [...]int{}
+<p>Because the underlying array part of the slice is passed through an implicit pointer (<u>the pointer itself is still passed by value</u>), the called function <u>can modify the data in the call parameter slice through the pointer.</u> In addition to data, the slice structure also contains slice length and slice capacity information. These two pieces of information are also passed by value. If the <strong>Len</strong> or <strong>Cap</strong> information is modified in the called function, it cannot be reflected in the slice of the calling parameter. At this time, we generally update the previous slice by returning the modified slice. This is why the built-in <strong>append</strong> must return a slice.</p>
+<p>Go supports recursive calls. There is no limit to the recursive call depth of Go functions, that is, there is no limit to the size of the call stack, and there will be no overflow errors. This is because the Go function stack <u>dynamically adjusts the size.</u><br>
+Before Go1.4, the dynamic stack was a <u>segmented stack</u> implemented by <u>linked list</u>, and the node memory location of each linked list would not change. Since the memory locations of adjacent nodes are generally not adjacent, which increases the probability of CPU cache misses, the performance of hotspot calls across different nodes of the linked list is reduced.<br>
+After Go1.4, a <u>dynamic array-like structure</u> was used to implement a <u>continuous dynamic stack</u>, which solved the shortcomings of the above segmented stack. But its disadvantage is that when the continuous dynamic stack grows, the previous data needs to be moved to a new memory space, which causes the addresses of all variables in the previous stack to change, so pointers in Go are <u>no longer fixed.</u>(that is, you cannot hold pointers for a long time in programming (this is different from C/C ++), although the Go runtime will automatically update the pointers that refer to the changed stack variables).</p>
+<p>The concept of stack and heap is not even mentioned in the Go language specification deliberately. We can't know whether the function parameters or local variables are stored on the stack or the heap, we just need to know that they can work properly. Consider the following example:</p>
+<pre><code class="language-Go">func f(x int) *int {
+    return &amp;x
+}
+
+func g() int {
+    x = new(int)
+    return *x
+}
 </code></pre>
-<p>长度为0的数组不占用内存空间。虽然空数组很少被使用，但它们可以用来强调某些类型的操作，以避免分配额外的内存空间，例如管道同步操作：</p>
-<pre><code class="language-Go">c1 := make(chan [0]int)
-go func() {
-    fmt.Println(&quot;c1&quot;)
-    c1 &lt;- [0]int{}
-}()
-&lt;- c1
+<p>The first function directly returns the address of the function parameter variable-this seems impossible, because if the parameter variable is on the stack, the stack variable becomes invalid after the function returns, and the returned address should naturally also become invalid. But the Go compiler and runtime are much smarter than us, and it will ensure that the variables pointed to by the pointer are in the right place. The second function, although calling the <strong>new</strong> function internally creates a pointer object of type <strong>*int</strong>, but still does not know where it is stored. For programmers with C/C ++ programming experience, it is important to emphasize that: <u>don't care about the function stack and heap problems in Go, the compiler and runtime will help us get it; also don't assume that the location of variables in memory is fixed, the pointer may change at any time, especially if you don't expect it to change.</u></p>
+<h2 id="132-method">1.3.2 Method</h2>
+<p>Method is generally a feature of object-oriented programming (OOP). In the C ++ language, method correspond to member functions of a class object and is associated with <u>virtual tables on specific objects.</u> However, Go method is associated with <u>type</u>, so that static binding of methods can be done during the compilation phase.</p>
+<p>The method evolved from the function, just <u>moved the first object parameter of the function to the front of the function name</u>:</p>
+<pre><code class="language-Go">type File struct {
+    fd int
+}
+func OpenFile(name string) (f *File, err error) {
+    // ...
+}
+/////////////////////////////////////// C-style File function ///////////////////////////////////////
+func CloseFile(f *File) error {
+    // ...
+}
+func ReadFile(f *File, offset int64, data []byte) int {
+    // ,,,
+}
+
+/////////////////////////////////////// Go OOP ///////////////////////////////////////
+func (f *File) Close() error {
+    // ...
+}
+func (f *File) Read(offset int64, data []byte) int {
+    // ...
+}
 </code></pre>
-<p>此处我们不关心管道中传输的实际数据类型，管道中的接收和发送操作仅用于消息同步。对于这个应用场景，我们使用一个空数组作为管道类型，以减少分配管道元素的开销。<br>
-当然，通常更倾向于使用无类型的匿名结构体以达到相同的目的：</p>
-<pre><code class="language-Go">c2 := make(chan struct{})
-go func() {
-    fmt.Println(&quot;c2&quot;)
-    c2 &lt;- struct{}{}    // The part of 'struc{}' means type, and the '{}' represents the value of the structure
-}()
-&lt;- c2
+<p>We can still use the method according to the original procedural thinking. The method can be reduced to a normal type of function by calling the characteristics of the <u>method expression</u>:</p>
+<pre><code class="language-Go">// not rely on the specific File object
+// func CloseFile(f *File) error
+var CloaseFile = (*File).Close
+
+// func ReadFile(f *File, offset int64, data []byte) int
+var ReadFile = (*File).Read
+
+f, _ := OpenFile(&quot;foo.dat&quot;)
+// need to pass the f parameter
+ReadFile(f, 0, data)       
+CloseFile(f)
 </code></pre>
-<p>在golang中，数组是切片和字符串的基础结构。数组的许多操作都可直接用于切片和字符串。</p>
-<blockquote>
-<p>References:<br>
-<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
-</blockquote>
+<p>In some scenarios, we are more concerned about a similar set of operations: for example, <strong>Read</strong> reads some arrays, and then calls <strong>Close</strong> to close. In this environment, the user does not care about the type of operation object, as long as it can meet the general <strong>Read</strong> and <strong>Close</strong> behavior. However, in the method expression, because the obtained <strong>ReadFile</strong> and <strong>CloseFile</strong> function parameters contain the unique type parameter of <strong>File</strong>, this makes the File-related methods not seamlessly compatible with other objects that are not of the <strong>File</strong> type but have the same <strong>Read</strong> and <strong>Close</strong> methods.<br>
+We can eliminate the difference in the first parameter type in the method expression by combining <strong>closure</strong> characteristics:</p>
+<pre><code class="language-Go">f, _ := OpenFile(&quot;foo.dat&quot;)
+
+// bind to f object
+// func Close() error
+var Close = func() error {
+    return (*File).Close(f)
+}
+
+// bind to f object
+// func Read(offset int64, data []byte) int
+var Read = func(offset int64, data []byte) int {
+    return (*File).Read(f, offset, data)
+}
+
+// do not need to pass the f parameter
+Read(0, data)
+Close()
+</code></pre>
+<p>The method value characteristic can simplify the realization:</p>
+<pre><code class="language-Go">f, _ := OpenFile(&quot;foo.dat&quot;)
+
+// method value:  bind to f object
+// func Close() error
+var Close = f.Close
+
+// method value:  bind to f object
+// func Read(offset int64, data []byte) int
+var Read = f.Read
+
+// do not need to pass the f parameter
+Read(0, data)
+Close()
+</code></pre>
+<p>Go do not support the traditional OOP's inheritance, but use the <u>combination</u> to implement it.<br>
+In Go, inheritance is achieved by building anonymous members in the structure:</p>
+<pre><code class="language-Go">import &quot;image/color&quot;
+
+type Point struct{X, Y float64}
+
+type ColoredPoint struct {
+    Point
+    Color color.RGBA
+}
+
+// two ways to use 
+var cp ColoredPoint
+cp.X = 1
+fmt.Println(cp.Point.X) // &quot;1&quot;
+cp.Point.Y = 2
+fmt.Println(cp.Y) // &quot;2&quot;
+</code></pre>
+<p>By embedding anonymous members, we can also <u>inherit the methods corresponding to anonymous member types</u>. We generally regard <strong>Point</strong> as the base class, and <strong>ColoredPoint</strong> as its inherited class or subclass. However, the method inherited in this way <u>cannot achieve the polymorphism of virtual functions in C++</u>. The receiver parameter of all inherited methods is <u>still the anonymous member itself</u>, not the current variable.</p>
+<pre><code class="language-Go">type Cache struct {
+    m map[string]string
+    sync.Mutex
+}
+
+func (p *Cache) Lookup(key string) string {
+    p.Lock()               // p.Mutex.Lock(), this expansion is done at compile time, and no runtime cost.
+    defer p.Unlock()  // p.Mutex.Unlock(), this expansion is done at compile time, and no runtime cost.
+
+    return p.m[key]
+}
+</code></pre>
+<p>If we need the polymorphism of virtual function, we need to use Go <strong>interface</strong> to achieve.</p>
+<h2 id="133-interface">1.3.3 Interface</h2>
+<p>Interface is also a type, and interface in Go is an abstraction and generalization of other types of behavior. Go is a <u>strongly typed language</u>. Implicit type conversion is not allowed between types(like <strong>int</strong> to <strong>int64</strong>,<br>
+It is also impossible to assign a value of type <strong>int</strong> to a variable of the newly defined named type whose bottom type is <strong>int</strong> and so on), but interfaces are an exception. As long as an object implements a method of an interface, it can be regarded as the interface type.  The interface type of Go language is <u>lazy binding</u>, which can realize <u>polymorphism like virtual function</u>, and implements the <u>implicit duck object-oriented model</u>.<br>
+This design is especially flexible and useful when the types we use come from packages that are not under our control.<br>
+For example, implement the custom <strong>Writer</strong>:</p>
+<pre><code class="language-Go">// Go source code
+type io.Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+// implement the custom Writer, convert each character to uppercase and output
+type UpperWriter struct {
+    io.Writer
+}
+
+func (p *UpperWriter) Write(data []byte) (n int, err error) {
+    return p.Writer.Write(bytes.ToUpper(data))
+}
+
+func main() {
+    fmt.Fprintln(&amp;UpperWriter{os.Stdout}, &quot;hello, world&quot;) // func Fprintf(w io.Writer, format string, args ...interface{}) (int, error)
+}
+</code></pre>
+<p>Conversions between objects and interfaces, conversions between interfaces and interfaces may all be implicit conversions:</p>
+<pre><code class="language-Go">var (
+    a io.ReadCloser = (*os.File)(f) //  implicit conversion, *os.File satisfy io.ReadCloser interface
+    b io.Reader     = a             // implicit conversion, io.ReadCloser satisfy io.Reader interface
+    c io.Closer     = a             // implicit conversion, io.ReadCloser satisfy io.Closer interface
+    d io.Reader     = c.(io.Reader) // explicit conversion, io.Closer not satisfy io.Reader interface
+)
+</code></pre>
+<h3 id="limit-the-flexibility-of-interface-adaptation">Limit the flexibility of interface adaptation</h3>
+<p>A common practice is to define a special method to distinguish interfaces. For example, the <strong>Error</strong> interface in the <strong>runtime</strong> package defines a unique <strong>RuntimeError</strong> method to prevent other types from inadvertently adapting the interface:</p>
+<pre><code class="language-Go">type runtime.Error interface {
+    error
+
+    // RuntimeError is a no-op function but
+    // serves to distinguish types that are run time
+    // errors from ordinary errors: a type is a
+    // run time error if it has a RuntimeError method.
+    RuntimeError()
+}
+</code></pre>
+<p>In <strong>protobuf</strong>, the Message interface also adopts a similar method, and also defines a unique <strong>ProtoMessage</strong> to prevent other types from inadvertently adapting the interface:</p>
+<pre><code class="language-Go">type proto.Message interface {
+    Reset()
+    String() string
+    ProtoMessage()
+}
+</code></pre>
+<p>But defining unique methods does not prevent others from forging this method. A stricter approach is to define a <strong>private</strong> method for the interface. Only objects that satisfy this private method may satisfy this interface, and the name of the private method <u>contains the absolute path name of the package</u>, so this interface can only be satisfied by implementing this private method <u>inside the package</u>. The <strong>testing.TB</strong> interface in the <strong>test</strong> package uses a similar technique:</p>
+<pre><code class="language-Go">type testing.TB interface {
+    Error(args ...interface{})
+    Errorf(format string, args ...interface{})
+    ...
+
+    // A private method to prevent users implementing the
+    // interface and so future additions to it will not
+    // violate Go 1 compatibility.
+    private()
+}
+</code></pre>
+<p>However, this method of prohibiting external objects from implementing interfaces through private methods comes at a price: first, this interface can only be used internally by the package, and external packages cannot normally directly create objects that satisfy the interface; second, this protective measure also Not absolutely, malicious users can still bypass this protection mechanism.</p>
+<p>In the previous method section we talked about that, by embedding anonymous type members in the structure, you can inherit the anonymous type methods. In fact, the embedded anonymous member is not necessarily a common type, but also an interface type. We can forge a private <strong>private</strong> method by embedding an anonymous <strong>testing.TB</strong> interface. Because the interface method is <u>delayed binding</u>, it does not matter whether the private method really exists at <u>compile time</u>.</p>
+<p>This method of implementing inheritance by embedding an anonymous interface or embedding an anonymous pointer object is actually a pure virtual inheritance. <u>What we inherit is only the specification specified by the interface</u>, and <u>the real implementation is injected at runtime</u>. For example, we can analog implementation a gRPC's <strong>plugin</strong>:</p>
+<pre><code class="language-Go">// the native gRPC's plugin
+type Plugin interface {
+    // Name identifies the plugin.
+    Name() string
+    // Init is called once after data structures are built but before
+    // code generation begins.
+    Init(g *Generator)
+    // Generate produces the code generated by the plugin for this file,
+    // except for the imports, by calling the generator's methods
+    // P, In, and Out.
+    Generate(file *FileDescriptor)
+    // GenerateImports produces the import declarations for this file.
+    // It is called after Generate.
+    GenerateImports(file *FileDescriptor)
+}
+
+// custom gRPC's plugin
+type grpcPlugin struct {
+    *generator.Generator
+}
+
+func (p *grpcPlugin) Name() string { return &quot;grpc&quot; }
+
+func (p *grpcPlugin) Init(g *generator.Generator) {
+    p.Generator = g
+}
+
+func (p *grpcPlugin) GenerateImports(file *generator.FileDescriptor) {
+    if len(file.Service) == 0 {
+        return
+    }
+
+    p.P(`import &quot;google.golang.org/grpc&quot;`)
+    // ...
+}
+</code></pre>
+<p>Go can easily achieve advanced features such as duck object-oriented and virtual inheritance through the combination of several simple features. It is really incredible!</p>
 
                                 </div>
                             </div>
@@ -360,8 +590,8 @@ go func() {
                             <div class="post-copyright">
                                 作者:
                                 tomorrow<br>永久链接:
-                                    <a href="https://TomorrowTown.github.io/post/2020-11-12-golang-basics-array/" title="Go语言基础(一) -- array">
-                                        https://TomorrowTown.github.io/post/2020-11-12-golang-basics-array/
+                                    <a href="https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou/" title="Go语言基础(四) -- 函数、方法和接口">
+                                        https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou/
                                     </a><br> 协议: MIT License
                             </div>
                         </div>
@@ -385,16 +615,16 @@ go func() {
                 <div class="lite-item nearby-article">
                     
                         <div class="nearby-article-left" style="padding: 10px;">
-                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/you-xi-kai-fa-zhong-de-she-ji-mo-shi-yi-ming-ling-mo-shi/">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/">
                                 <i class="fa fa-chevron-left"></i>
-                                游戏开发中的设计模式(一) -- 命令模式
+                                Go语言并发编程模型(一) -- 开篇
                             </a>
                         </div>
                         
                             
                                 <div class="nearby-article-right" style="padding: 10px;">
-                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-11-05-go-server-performance-analyze/">
-                                        go服务器性能分析方法<i class="fa fa-chevron-right"></i>
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-11-29-golang-basics-slice/">
+                                        Go语言基础(三) -- slice<i class="fa fa-chevron-right"></i>
                                     </a>
                                 </div>
                                 
@@ -403,9 +633,9 @@ go func() {
                 <span style="margin-right:15px">
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
-                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-11-12-golang-basics-array/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-11-12-golang-basics-array/&sharesource=qzone&title=Go语言基础(一) -- array&pics=https://TomorrowTown.github.io/images/avatar.png?v=1610129458508&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-11-12-golang-basics-array/&sharesource=weibo&title=Go语言基础(一) -- array + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1610129458508"><i class="fa fa-weibo "></i></a>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou/&sharesource=qzone&title=Go语言基础(四) -- 函数、方法和接口&pics=https://TomorrowTown.github.io/images/avatar.png?v=1610129458508&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/go-yu-yan-ji-chu-si-han-shu-fang-fa-he-jie-kou/&sharesource=weibo&title=Go语言基础(四) -- 函数、方法和接口 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1610129458508"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             
