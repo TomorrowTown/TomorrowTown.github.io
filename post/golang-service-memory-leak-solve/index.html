@@ -233,22 +233,26 @@
                     <article class="post post-type real-post">
                         <header class="post-type-header">
                             
-                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-12-01-golang-basics-introductory-remarks.png')"></div>
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/golang-service-memory-leak-solve.png')"></div>
                                 
                                         <div class="thumbnail-shadow">
                                             <h1 class="post-title">
-                                                Go语言并发编程模型(一) -- 开篇
+                                                记一次golang后台服务内存泄漏问题的排查
                                             </h1>
                                             <div class="post-info">
                                                 <span class="post-category"><i class="Card Card-novel"></i>
                                         
+                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/arYM2gMFx/'">性能优化</span>
+                                                
+                                            <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/n9MXmjtY-/'">服务器开发</span>
+                                                
                                             <span onclick="javascript:top.location='https://TomorrowTown.github.io/tag/lXXd7xbfA/'">golang</span>
                                                 
                                                     </span>
                                                     <span class="post-view">
                                                     
                                                         &nbsp;•&nbsp;
-                                                    <span id="/post/2020-12-01-golang-basics-introductory-remarks/" class="leancloud_visitors" data-flag-title="Go语言并发编程模型(一) -- 开篇">
+                                                    <span id="/post/golang-service-memory-leak-solve/" class="leancloud_visitors" data-flag-title="记一次golang后台服务内存泄漏问题的排查">
                                                 <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
                                                 <i class="leancloud-visitors-count">0</i>
                                             </span>
@@ -257,42 +261,80 @@
                                                             </span>&nbsp;•&nbsp;
 
                                                             <span class="post-readtime">阅读时间:
-                                            2.7分</span>
+                                            6.7分</span>
                                                             <span class="post-edit"></span></div>
                                         </div>
                                         <div class="post-relative">
                                             <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1610128432875" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1610128432875" class="avatar avatar-100 photo" width="100" height="100">
                                             <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
-                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2021-01-08</span>
                                         </div>
                         </header>
                         <div class="post-main post-type-main">
                             <div class="post-content">
                                 <div class="post-content-real">
                                     <h2 id="0x00">0x00</h2>
-<p>首先看一下并发与并行的区别：<br>
-并发：注意力更多地集中于设计层面，并发程序能够被顺序执行；<br>
-并行：注意力更多地集中于运行层面，并发程序一般是大量简单重复的运算。<br>
-在早期，CPU在一个单核中顺序地执行机器指令，所以早期地编程语言是一种顺序地编程语言：所有地指令都以串行地方式执行。当单核CPU的频率达到极限时，就会出现多核处理器，相应的，编程语言也需要朝着并行的方向发展。<br>
-在并发编程中，对资源的精确访问需要精确的控制。在大多数语言中，这个困难的问题是通过锁和其他同步解决方案来解决的。但在golang中有另一种方式，它将共享的值通过channel传递。在任何时刻，最好只有一个goroutine可以拥有该资源。数据竞争在设计层面被消除。<br>
-常用的并发编程模型有多线程模型、消息传递模型等。golang是基于消息并发实现其并发特性的，其将CSP并发编程模型内置到了语言中。与Erlang不同的是，golang的goroutine是由<strong>go</strong>这个关键字创建的共享内存。<br>
-Golang并发编程的slogan：</p>
+<p>某日我们用golang编写的后台的网关服务在使用机器人压测时出现了使用内存激增的问题(达到了6G......)，毫无疑问，内存泄露了。于是就需要利用go tool pprof进行苦逼的排查了......</p>
+<h2 id="分析heap还是goroutine">分析heap还是goroutine?</h2>
+<p>对于进程内存的分析，利用go tool pprof可以获得heap及goroutine的相关信息。那么到底是选择分析heap呢，还是goroutine呢？<br>
+一句话结论：<strong>使用内存profiling并不能在多线程环境下排查出内存泄露的原因</strong>。<br>
+原因如下：<br>
+使用heap能获得内存分配的情况，可以具体到哪一行代码占用了过多的内存，因而可以纠正缺少对于性能考虑的编码问题。但是在多线程环境下，排除低性能编码的情况，heap得到的只是一个点，一个最终结果，一个表象。因为这一个内存占用高的代码可能被多个goroutine调用，仅用heap我们并不能找到是哪条goroutine路径造成的泄漏，找不到源头，就无法解决内存泄漏问题，因此我们将利用go tool pprof获取goroutine的profile文件去分析。俗话说的好，<u>&quot;go服务器内存泄漏，十次有九次都是协程泄漏&quot;，</u>所以排查的重点自然也应首先放在对于goroutine的排查上。<br>
+那么什么是goroutine泄漏？还是一句话总结：<strong>该退出的协程没退出，被阻塞了，就是协程泄漏</strong>。</p>
+<h2 id="分析goroutine的profile文件">分析goroutine的profile文件</h2>
+<p>后台服务开启pprof的具体方法在此省略。</p>
+<h3 id="1-获取goroutine的profile文件">1. 获取goroutine的profile文件</h3>
+<p>在启动后台服务，启动压测机器人一小段时间之后，输入：</p>
+<pre><code class="language-shell">go tool pprof http://localhost:9900/debug/pprof/goroutine
+</code></pre>
+<p>获得此时的goroutine profile文件，将其作为后续比较的基准文件。输入<strong>top</strong>指令可以得到持有goroutine数量最多的10个协程从高到低的序列，如下：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610116760400.png" alt="" loading="lazy"><br>
+接下来去喝杯茶或者带薪拉屎......<br>
+回来之后再次输入：</p>
+<pre><code class="language-shell">go tool pprof http://localhost:9900/debug/pprof/goroutine
+</code></pre>
+<p>继续<strong>top</strong>，得到：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610116774212.png" alt="" loading="lazy"><br>
+好家伙，我他妈直接好家伙，才一泡屎的功夫，网关的协程数量就多了快300个(前提是压测机器人仅启动了十个，并且每个机器人也只发少量的rpc请求)，协程泄漏无疑了。</p>
+<h3 id="2-比较两个时间点的goroutine的profile文件">2. 比较两个时间点的goroutine的profile文件</h3>
+<p>在获得以上两个goroutine的profile文件的基础上，输入：</p>
+<pre><code class="language-shell">go tool pprof -base 基准profile文件名 第二个较新的profile文件名
+</code></pre>
+<p>得到：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610122817975.png" alt="" loading="lazy"><br>
+再输入<strong>traces</strong>得到第二个profile比第一个profile多出来的协程调用栈：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610122834324.png" alt="" loading="lazy"><br>
+这里只有一个调用栈，而多出来的280个协程也正好在这个调用栈中。<br>
+在这个调用栈里面<strong>runtime.gopark</strong>这样的系统调度方法不用管，我们找自己项目里的方法，<strong>sync.(*Cond).Wait</strong>是我们项目的代码，所以输入<strong>list</strong> Wait(list支持模糊查询)命令，进去该方法内部看看：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610122859095.png" alt="" loading="lazy"><br>
+找到项目代码里的部分，我们可以看到这280个协程阻塞在了<strong>waitForMsgs</strong>里的**s.pCond.Wait()**里了，这属于我们项目使用的mq代码。<br>
+阻塞大量协程的地方找到了，接下来就是进入到mq及项目的源码去具体分析为什么会阻塞在这里了。</p>
+<h2 id="nats-reply-subscribe接收过程">nats reply subscribe接收过程</h2>
+<p>上面我们定位到了是<strong>waitForMsgs()<strong>里的</strong>s.pCond.Wait()<strong>阻塞了协程。这属于我们项目使用的开源消息中间件NATS中的代码。<br>
+<strong>waitForMsgs()<strong>中的注释如下：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610123557783.png" alt="" loading="lazy"><br>
+由此可知该方法是用于传递消息给我们的异步sub的。<br>
+继续看</strong>waitForMsgs()<strong>的源码，如下(由于这个函数实在太多行了，所以只看最关键的for循环~)：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610124941678.png" alt="" loading="lazy"><br>
+<img src="https://TomorrowTown.github.io/post-images/1610124948492.png" alt="" loading="lazy"><br>
+由以上代码可知</strong>s.pCond.Wait()<strong>是在等待其他服务向我们的sub去pub消息的，如果一直没有消息pub过来，就会一直在这里Wait，break这个for循环的条件有两个，一个是waitForMsgs()的参数</strong>Subscription</strong>的</strong>closed</strong>变量为true，另一个是达到了消息传递上限。<br>
+从源码中我并没有发现对于sub的等待超时机制，所以这个for必定不会因为超时(长时间收不到pub的消息)而将<strong>closed</strong>置为true，从而将for循环break，其实对于pub/sub模型下的mq，不做超时机制这也可以理解的；同理，如果长时间收不到对应的sub，那么for循环也不会因为达到了消息传递上限而break。由此可知，如果一个错误的sub被加载到nats-client，则会导致这个for循环长期阻塞在<strong>s.pCond.Wait()</strong>。</p>
+<p>从<strong>waitForMsgs</strong>的Usage可以看到，它是被<strong>subscribeLocked()<strong>方法调用的：<br>
+<img src="https://TomorrowTown.github.io/post-images/1610123855828.png" alt="" loading="lazy"><br>
+由上图可知，每个</strong>subscribe()<strong>的调用都会</strong>go</strong>一个**waitForMsgs()**协程用于回调我们注册的方法，**subscribeLocked()<strong>又是被</strong>subscribe()**调用的，**subscribe()<strong>又被我们自己写的gateserver调用。<br>
+这样就能解释为什么gateserver的内存会泄露了，以及为什么会在</strong>s.pCond.Wait()**处阻塞大量协程了，<br>
+根本原因是NATS在nats-client sub了之后会在一个无法满足退出条件的for循环中Wait其对应的pub，且由于pub/sub模型的需要，并没有一个超时机制去清除长时间没被pub的sub。既然NATS是这么设计的，而且是合理的设计，那么出问题的只能是我们自己了...... : (</p>
+<p>所以导致goroutine泄漏的原因就是我们进行了错误的sub。怎么个错误法，可能的原因有两个：</p>
+<ol>
+<li>我们sub了一个没有任何服务去处理的topic；</li>
+<li>由于NATS是根据key去查找sub的，所以有可能是我们在添加KV pair时部分key是重复的，导致NATS 在pub消息时总是只能传递到所有重复key的sub的其中一个sub，进而导致其他重复key的sub始终没有收到pub的消息，从而导致它们被阻塞，且随着时间的推移，sub的次数越来越多，阻塞的goroutine也越来越多......</li>
+</ol>
 <blockquote>
-<p>Do not communicate by sharing memory; instead, share memory by communicating.</p>
+<p>压测机器人是定时发送一批sub的，假如一次分别sub的是A，B，C三个主题，而在gateserver中我们维护的sub map在add时没处理好，使得B和C拥有了相同的key，那么在B和C之中永远有一个永远收不到pub的消息，而压测机器人又在不停地sub A、B、C......</p>
 </blockquote>
-<h2 id="go协程与系统线程">go协程与系统线程</h2>
-<p>go协程(goroutine)是一种轻量级的线程。启动一个go协程，不仅简单如调用一个函数，而且启动的开销非常小，协程之间的调度成本也非常低。</p>
-<h3 id="go协程与系统线程的差别">go协程与系统线程的差别</h3>
-<p>go协程与系统线程的差别只是一个变量，但正是这个变量的区别导致了go并发编程的质的飞跃。<br>
-**系统级线程：**具有固定的栈大小(通常默认是2MB)，该栈主要用于在递归调用函数时保存参数和局部变量。固定栈大小会导致两个问题：一是对许多只需要少量栈空间的线程来说是一种巨大的浪费；二是需要大量栈空间的线程会面临栈溢出的风险。<br>
-**go协程：**goroutine以一个非常小的栈启动，栈大小不固定，可动态伸缩(最多为1GB)。因此启动成本非常小，所以可以启动成千上万个goroutine。</p>
-<h3 id="goroutine的调度器">goroutine的调度器</h3>
-<p>goroutine采用半抢占式的协作调度，只有在当前goroutine被阻塞时才会导致调度。同时，它发生在用户模式下。调度器会根据具体函数只保存必要的寄存器，切换成本远低于系统线程。运行时有一个<strong>runtime.GOMAXPROCS</strong>变量，用于控制当前运行正常非阻塞Goroutine的系统线程数。<br>
-关于goroutine的调度器的详细说明请参阅：&lt;(https://tonybai.com/2017/06/23/an-intro-about-goroutine-scheduler/&gt;</p>
-<blockquote>
-<p>References:<br>
-<a href="https://chai2010.cn/advanced-go-programming-book/">Advanced Go Programming</a></p>
-</blockquote>
+<p>对于第一个可能，其实是不可能的，因为<strong>对于pub/sub模型，我们针对的是“服务(Service)”这个粒度的发布和推送，而不是“方法(Method)”这个粒度的发布和推送</strong>，所以不可能是“方法”不对导致的收不到pub消息，所以没必要再画蛇添足增加对于“方法”的鉴权了(我最初就画蛇添足了，结果导致许多服务都不能用了......)。而在我们的gateserver中已经有了对于“服务”sub的鉴权了，所以在gateserver中不存在客户端能够sub一个不存在的“服务”的情况。<br>
+那么就只剩下上述第二种情况了......经查，果然是......<br>
+每次往gateserver维护的sub map添加KV时，把原来会重复的key换成唯一key就好了...... 真傻逼的错误啊......</p>
 
                                 </div>
                             </div>
@@ -302,8 +344,8 @@ Golang并发编程的slogan：</p>
                             <div class="post-copyright">
                                 作者:
                                 tomorrow<br>永久链接:
-                                    <a href="https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/" title="Go语言并发编程模型(一) -- 开篇">
-                                        https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/
+                                    <a href="https://TomorrowTown.github.io/post/golang-service-memory-leak-solve/" title="记一次golang后台服务内存泄漏问题的排查">
+                                        https://TomorrowTown.github.io/post/golang-service-memory-leak-solve/
                                     </a><br> 协议: MIT License
                             </div>
                         </div>
@@ -326,17 +368,10 @@ Golang并发编程的slogan：</p>
                 </style>
                 <div class="lite-item nearby-article">
                     
-                        <div class="nearby-article-left" style="padding: 10px;">
-                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-02-golang-basics-atomic-operation/">
-                                <i class="fa fa-chevron-left"></i>
-                                Go语言并发编程模型(二) -- 原子操作
-                            </a>
-                        </div>
-                        
                             
                                 <div class="nearby-article-right" style="padding: 10px;">
-                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-11-29-golang-basics-string/">
-                                        Go语言基础(二) -- string<i class="fa fa-chevron-right"></i>
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-12-9-golang-basics-context/">
+                                        Go语言并发编程模型(九) -- context<i class="fa fa-chevron-right"></i>
                                     </a>
                                 </div>
                                 
@@ -345,9 +380,9 @@ Golang并发编程的slogan：</p>
                 <span style="margin-right:15px">
     <i class="post-share"></i>
     <span>&#x5206;&#x4EAB;:</span>
-                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/"><i class="fa fa-qrcode"></i></a>
-                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/&sharesource=qzone&title=Go语言并发编程模型(一) -- 开篇&pics=https://TomorrowTown.github.io/images/avatar.png?v=1610128432875&summary="><i class="fa fa-qq"></i></a>
-                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/&sharesource=weibo&title=Go语言并发编程模型(一) -- 开篇 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1610128432875"><i class="fa fa-weibo "></i></a>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/golang-service-memory-leak-solve/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/golang-service-memory-leak-solve/&sharesource=qzone&title=记一次golang后台服务内存泄漏问题的排查&pics=https://TomorrowTown.github.io/images/avatar.png?v=1610128432875&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/golang-service-memory-leak-solve/&sharesource=weibo&title=记一次golang后台服务内存泄漏问题的排查 + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1610128432875"><i class="fa fa-weibo "></i></a>
                 </span>
                 
                                             
