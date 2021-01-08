@@ -229,39 +229,289 @@
 </header>
         <div id="main">
             <div id="main-part">
-                <ul class="posts-list">
-                    <li class="lite-item">
-                        <article class="post post-type">
-                            <div class="post-main post-type-main">
-                                <div class="post-content">
-                                    <div class="post-content-real">
+                <div class="lite-item">
+                    <article class="post post-type real-post">
+                        <header class="post-type-header">
+                            
+                                <div class="thumbnail-link" style="background-image: url('https://TomorrowTown.github.io/post-images/2020-11-29-golang-basics-slice.png')"></div>
+                                
+                                        <div class="thumbnail-shadow">
+                                            <h1 class="post-title">
+                                                Go语言基础(三) -- slice
+                                            </h1>
+                                            <div class="post-info">
+                                                <span class="post-category"><i class="Card Card-novel"></i>
                                         
-                                            <a href="https://TomorrowTown.github.io/tag/arYM2gMFx/">
-                                                性能优化
-                                            </a>
-                                            
-                                            <a href="https://TomorrowTown.github.io/tag/n9MXmjtY-/">
-                                                服务器开发
-                                            </a>
-                                            
-                                            <a href="https://TomorrowTown.github.io/tag/lXXd7xbfA/">
-                                                golang
-                                            </a>
-                                            
-                                            <a href="https://TomorrowTown.github.io/tag/CHJWtbNKg/">
-                                                游戏开发
-                                            </a>
-                                            
-                                            <a href="https://TomorrowTown.github.io/tag/4AAgEC-1o/">
-                                                设计模式
-                                            </a>
-                                            
-                                    </div>
+                                                    </span>
+                                                    <span class="post-view">
+                                                    
+                                                        &nbsp;•&nbsp;
+                                                    <span id="/post/2020-11-29-golang-basics-slice/" class="leancloud_visitors" data-flag-title="Go语言基础(三) -- slice">
+                                                <i class="Card Card-view"></i>&nbsp;阅读量&nbsp;
+                                                <i class="leancloud-visitors-count">0</i>
+                                            </span>
+
+                                                    
+                                                            </span>&nbsp;•&nbsp;
+
+                                                            <span class="post-readtime">阅读时间:
+                                            12.9分</span>
+                                                            <span class="post-edit"></span></div>
+                                        </div>
+                                        <div class="post-relative">
+                                            <img alt="tomorrow" src="https://TomorrowTown.github.io/images/avatar.png?v=1610129201005" srcset="https://TomorrowTown.github.io/images/avatar.png?v=1610129201005" class="avatar avatar-100 photo" width="100" height="100">
+                                            <span class="post-type-author"><a href="https://TomorrowTown.github.io" title="由tomorrow发布" rel="author">tomorrow<i class="Card Card-certify"></i></a></span>
+                                            <span class="post-publish"><i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;2020-11-29</span>
+                                        </div>
+                        </header>
+                        <div class="post-main post-type-main">
+                            <div class="post-content">
+                                <div class="post-content-real">
+                                    <p>懒，所以直接贴笔记了</p>
+<h2 id="0x00">0x00</h2>
+<p>Simply put, a slice is a simplified version of a <u>dynamic array</u>. Becuase the length of the dynamic array is not fixed, the length of the slice naturally cannot be part of the type.<br>
+The underlying structure of Go slice is defined in <strong>reflect.SliceHeader:</strong></p>
+<pre><code class="language-Go">type SliceHeader struct {
+    Data  uintptr
+    Len    int
+    Cap   int
+}
+</code></pre>
+<p>Compared with string, the slice has an additional <strong>Cap</strong> member indicating the maximum capacity of the memory space pointed by the slice(corresponding to the number of elements, not the number of bytes).<br>
+<em>Figure: The memory structure corresponding to the x := []int{2,3,5,7,11} and y := x[1:3] slice:</em><br>
+<img src="https://TomorrowTown.github.io/post-images/1606662287728.png" alt="" loading="lazy"></p>
+<h2 id="the-way-to-define-slice">The way to define slice:</h2>
+<pre><code class="language-Go">var (
+    a []int                        // nil slice, equal to nil, generally used to indicate a non-existent slice
+    b = []int{}                  // empty slice, not equal to nil, generally used to represent a empty collection
+    c = []int{1, 2, 3}         // there are 3 elements in the slice, len and cap both are 3
+    d = c[:2]                    // there are 2 elements in the slice, len is 2, cap is 3 
+    e = c[0:2:cap(c)]        // there are 2 elements in the slice, len is 2, cap is 3 
+    f = c[:0]                      // there are 0 elements in the slice, len is 0, cap is 3
+    g = make([]int, 3)      // there are 3 elements in the slice, len and cap both are 3
+    h = make([]int, 2, 3)  // there are 2 elements in the slice, len is 2, cap is 3
+    i = make([]int, 0, 3)   // there are 0 elements in the slice, len is 0, cap is 3
+)
+</code></pre>
+<p>In addition to traversal, as long as the underlying data pointer, length and capacity of the slice have not changed, the traversal of the slice, the reading and modification of elements are the same as the array. When assigning values or passing parameters to the slice itself, it is similar to the operation of the array pointer, only the slice header information (reflect.SliceHeader) is copied, and <u>the underlying data is not copied.</u></p>
+<h2 id="add-slice-elements">add slice elements</h2>
+<p>The built-in generic function <strong>append</strong> can append N elements to the end of the slice:</p>
+<pre><code class="language-Go">var a []int
+a = append(a, 1)
+a = append(a, 1, 2, 3)
+a = append(a, []int{1, 2, 3}...)    // append a slice, and the slice need to unpack
+/*
+If we need to append a slice to another slice, we must use the ...(ellipsis) operator to tell the Go language to append the slice as multiple separate elements. The element to be appended must be of the same type as the element in the slice.
+*/
+</code></pre>
+<p>However, it should be noted that in the case of insufficient capacity, the <strong>append</strong> operation will result in reallocation of memory, which may result in huge memory allocation and copy data costs. Even if the capacity is sufficient, you still need to use the return value of the <strong>append</strong> function to update the slice itself, because the length of the new slice has changed.</p>
+<p>We can also add elements at the beginning of the slice:</p>
+<pre><code class="language-Go">var a []int{1, 2, 3}
+a = append([]int{0}, a)                // append a element at the beginning
+a = append([]int{-1, -2, -3}, a)    // append a slice at the beginning
+</code></pre>
+<p>At the beginning, it usually causes a reallocation of memory, and causes all existing elements to be copied once. Therefore, the performance of adding elements from the beginning of a slice is generally much <u>worse than the performance of adding elements from the end.</u></p>
+<p>Because the <strong>append</strong> function returns a new slice, that is, it supports chained operations. We can combine multiple <strong>append</strong> operations to insert elements in the middle of the slice:</p>
+<pre><code class="language-Go">var a []int
+a = append(a[:i], append([]int{x}, a[i:]...)...)       // insert x at the i position
+a = append(a[:i], append([]int{1,2,3}, a[i:]...)...)  // insert a slice at the i position
+</code></pre>
+<p>The second <strong>append</strong> call in each add operation <u>creates a temporary slice,</u> copies the contents of <strong>a[i:]</strong> to the newly created slice, and then appends the temporarily created slice to <strong>a[: i]</strong>.<br>
+The combination of <strong>copy</strong> and <strong>append</strong> can be used to avoid creating intermediate temporary slices, which is also the operation of adding elements:</p>
+<pre><code class="language-Go">a = append(a, 0)     // slice expansion by 1 space
+copy(a[i+1:], a[i:])   // a[i:] moves backward 1 position
+a[i] = x                    // set the newly added elements
+</code></pre>
+<p>The combination of <strong>copy</strong> and <strong>append</strong> can also be used to insert multiple elements in the middle (that is, insert a slice):</p>
+<pre><code class="language-Go">a = append(a, x...)           // Expand enough space for x slice
+copy(a[i + len(x):], a[i:])   // a[i:] moves backward len(x) position
+copy(a[1:], x)                   // copy the newly added slice
+</code></pre>
+<h2 id="delete-slice-elements">delete slice elements</h2>
+<p>There are three cases according to the position of the element to be deleted: delete from the beginning, delete from the middle, and delete from the tail. Among them, <u>deleting the element at the end of the slice is the fastest:</u></p>
+<pre><code class="language-Go">a = []int{1, 2, 3}
+a = a[:len(a)-1]    // delete 1 element at the end of the slice
+a = a[:len(a)-N]   // delete N elements at the end of the slice
+</code></pre>
+<p>Delete the element at the beginning can move the data pointer directly:</p>
+<pre><code class="language-Go">a = []int{1, 2, 3}
+a = a[1:]    // delete 1 element at the beginning of the slice
+a = a[N:]   // delete N elements at the beginning of the slice
+</code></pre>
+<p>Delete the elements at the beginning can also not move the data pointers, but it will move the following data to the beginning. Can be done in place with <strong>append</strong> (The so-called in-place completion refers to the completion within the memory interval corresponding to the initial slice data, and will not cause the change of the memory space structure).</p>
+<pre><code class="language-Go">a = []int{1, 2, 3}
+a = append(a[:0], a[1:]...) // delete 1 element at the beginning
+a = append(a[:0], a[N:]...) // delete N element at the beginning
+</code></pre>
+<p>Can also use the <strong>copy</strong> to delete elements at the beginning</p>
+<pre><code class="language-Go">a = []int{1, 2, 3}
+a = a[:copy(a, a[1:])] // delete 1 element at the beginning
+a = a[:copy(a, a[N:])] // delete N elements at the beginning
+</code></pre>
+<p>For deleting the middle element, it is necessary to move the remaining elements as a whole, which can also be done in-place with append or copy:</p>
+<pre><code class="language-Go">a = []int{1, 2, 3}
+
+a = append(a[:i], a[i+1:]...) // delete 1 element at the middle
+a = append(a[:i], a[i+N:]...) // delete N elements at the middle
+
+a = a[:i+copy(a[i:], a[i+1:])] // delete 1 element at the middle
+a = a[:i+copy(a[i:], a[i+N:])]// delete N elements at the middle
+</code></pre>
+<h2 id="slice-memory-tips">Slice memory tips</h2>
+<p>For slices, slices with <strong>len</strong> 0 but <strong>cap</strong> capacity other than 0 are very useful features. Of course, if both <strong>len</strong> and <strong>cap</strong> are 0, it becomes a real empty slice, although it is not a <strong>nil</strong> slice. When judging whether a slice is empty, it is generally judged by the length of the slice obtained by len. Generally, the slice and the nil value are rarely compared directly.</p>
+<p>For example, the following <strong>TrimSpace</strong> function is used to delete the space in []byte. The function implementation takes advantage of the 0-length slice feature, which is efficient and concise.</p>
+<pre><code class="language-Go">func TrimSpace(s []byte) []byte {
+    b := s[:0]
+    for _, x = range s {
+        if x != ' ' {
+            b = append(b, x)
+        }
+    }
+    return b
+}
+</code></pre>
+<p>In fact, similar algorithms that delete slice elements in-situ according to filter conditions can be handled in a similar method(because the deletion operation will not cause insufficient memory):</p>
+<pre><code class="language-Go">func Filter(s []byte, fn func(x byte) bool) []byte {
+    b := s[:0]
+    for _, x := range s {
+        if !fn(x) {
+            b = append(b, x)
+        }
+    }
+    return b
+}
+</code></pre>
+<p>The main point of efficient operation of slicing is tov<u>reduce the number of memory allocations</u>, try to ensure that the append operation will not exceed the capacity of the <strong>cap</strong>, and <u>reduce the number of triggered memory allocations and the size of memory allocated each time.</u></p>
+<h2 id="avoid-slice-memory-leaks">Avoid slice memory leaks</h2>
+<p><u>The slicing operation does not copy the underlying data</u>. The underlying array will be kept in memory until it is no longer referenced. However, sometimes the entire bottom array may be in use due to a small memory reference, which delays the automatic memory collector's collection of the bottom array.</p>
+<p>For example, the <strong>FindPhoneNumber</strong> function loads the entire file into memory, then searches for the first phone number that appears, and finally returns the result in slices.</p>
+<pre><code class="language-Go">func FindPhoneNumber(filename string) []byte {
+    b, _ := ioutil.ReadFile(filename)
+    return regexp.MustCompile(&quot;[0-9]+&quot;).Find(b)
+}
+</code></pre>
+<p>The <strong>[]byte</strong> returned by this code points to an array that holds the entire file. <u>Because the slice refers to the entire original array, the automatic garbage collector cannot release the space of the underlying array in time</u>. A small requirement may result in the need to save the entire file data for a long time. Although this is not a memory leak in the traditional sense, it may <u>slow down the overall performance of the system.</u></p>
+<p>To fix this problem, you can <u>copy the data of interest to a new slice</u> (data transfer is a philosophy of Go programming. Although value transfer has a certain price, the benefit of exchange is to <u>cut off the original data rely</u>):</p>
+<pre><code class="language-Go">func FindPhoneNumber(filename string) []byte {
+    b, _ := ioutil.ReadFile(filename)
+    b = regexp.MustCompile(&quot;[0-9]+&quot;).Find(b)
+    return append([]byte{}, b...)
+}
+</code></pre>
+<p>Similar problems may be encountered when deleting slice elements. Assuming that the pointer object is stored in the slice, then after deleting the end element, <u>the deleted element is still referenced by the underlying array of the slice</u>, which can not be recycled by the automatic garbage collector in time (this depends on the implementation of the collector):</p>
+<pre><code class="language-Go">var a []*int{ ... }
+a = a[:len(a)-1]    // the deleted element is still referenced by the underlying array of the slice, which may can not be recycled by the automatic garbage collector in time
+</code></pre>
+<p>The insurance method is to <u>first set the elements that need automatic memory recycling to <strong>nil</strong></u> to ensure that the automatic collector can find the objects that need to be recycled, and then delete the slices:</p>
+<pre><code class="language-Go">var a []*int{ ... }
+a[len(a)-1] = nil // GC recycled the last element's memory
+a = a[:len(a)-1]  // delete the last element in the slice
+</code></pre>
+<p>Of course, if the period of slicing is very short, you don't need to deal with this problem. Because if the slice itself can be recycled by GC, each element corresponding to the slice will naturally be recycled.</p>
+<h2 id="slice-type-cast">Slice type cast</h2>
+<p>For safety, when the underlying raw slice types of the two slice types []T and []Y are different, Go language cannot directly convert the types. But security comes at a price. Sometimes this conversion has its value-it can <u>simplify coding or improve the performance of the code</u>.<br>
+For example, on a 64-bit system, a []float64 slice needs to be sorted at high speed, we can force it to be converted to []int integer slice, and then sort by integer (because float64 follows the IEEE754 floating point standard feature, when floating number are ordered, the corresponding integers must also be ordered).</p>
+<p>The following code converts [] float64 type slices to [] int type slices in two ways:</p>
+<pre><code class="language-Go">// +build amd64 arm64
+
+import &quot;sort&quot;
+
+var a = []float64{4, 2, 5, 7, 2, 1, 88, 1}
+
+func SortFloat64FastV1(a []float64) {
+    // type conversion
+    var b []int = ((*[1 &lt;&lt; 20]int)(unsafe.Pointer(&amp;a[0])))[:len(a):cap(a)]
+
+    // sort the float as int
+    sort.Ints(b)
+}
+
+func SortFloat64FastV2(a []float64) {
+    // Update the slice header information through reflect.SliceHeader to achieve conversion
+    var c []int
+    aHdr := (*reflect.SliceHeader)(unsafe.Pointer(&amp;a))
+    cHdr := (*reflect.SliceHeader)(unsafe.Pointer(&amp;c))
+    *cHdr = *aHdr
+
+    // sort the float as int
+    sort.Ints(c)
+}
+</code></pre>
+<p>It should be noted that the length of non-zero size arrays in the Go implementation must <u>not exceed 2GB</u>, so the maximum length range of the array must be calculated for the type size of the array elements (<u>[]uint8 maximum 2GB, []uint16 maximum 1GB, and so on, But the length of the [] struct {} array can exceed 2GB</u>).</p>
+
                                 </div>
                             </div>
-                        </article>
-                    </li>
-                </ul>
+                            
+                        </div>
+                        <div class="post-footer">
+                            <div class="post-copyright">
+                                作者:
+                                tomorrow<br>永久链接:
+                                    <a href="https://TomorrowTown.github.io/post/2020-11-29-golang-basics-slice/" title="Go语言基础(三) -- slice">
+                                        https://TomorrowTown.github.io/post/2020-11-29-golang-basics-slice/
+                                    </a><br> 协议: MIT License
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <style>
+                    .prev:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                    
+                    .next:hover {
+                        color: #2d96bd;
+                        text-decoration: none;
+                        text-align: center;
+                        transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+                    }
+                </style>
+                <div class="lite-item nearby-article">
+                    
+                        <div class="nearby-article-left" style="padding: 10px;">
+                            <a class="prev" rel="prev" href="https://TomorrowTown.github.io/post/2020-12-01-golang-basics-introductory-remarks/">
+                                <i class="fa fa-chevron-left"></i>
+                                Go语言并发编程模型(一) -- 开篇
+                            </a>
+                        </div>
+                        
+                            
+                                <div class="nearby-article-right" style="padding: 10px;">
+                                    <a class="next" rel="next" href="https://TomorrowTown.github.io/post/2020-11-29-golang-basics-string/">
+                                        Go语言基础(二) -- string<i class="fa fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                                
+                </div>
+                <!--Share-->
+                <span style="margin-right:15px">
+    <i class="post-share"></i>
+    <span>&#x5206;&#x4EAB;:</span>
+                <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://TomorrowTown.github.io/post/2020-11-29-golang-basics-slice/"><i class="fa fa-qrcode"></i></a>
+                <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://TomorrowTown.github.io/post/2020-11-29-golang-basics-slice/&sharesource=qzone&title=Go语言基础(三) -- slice&pics=https://TomorrowTown.github.io/images/avatar.png?v=1610129201005&summary="><i class="fa fa-qq"></i></a>
+                <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://TomorrowTown.github.io/post/2020-11-29-golang-basics-slice/&sharesource=weibo&title=Go语言基础(三) -- slice + " - " + &pic="https://TomorrowTown.github.io/images/avatar.png?v=1610129201005"><i class="fa fa-weibo "></i></a>
+                </span>
+                
+                                            
+                                                <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: '',
+        appKey: '',
+        pageSize: 10,
+        avatar: 'mp',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: true,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                    
             </div>
             <div id="sidebar">
     <ul>
@@ -409,6 +659,7 @@
     </ul>
 </div>
         </div>
+
 </body>
 <footer id="foot">
     <a class="back-to-top" href="#"><i class="Card Card-top" ></i><span class="back-to-top-text">0%</span></a>
@@ -473,5 +724,18 @@
         $('img').attr('data-fancybox', 'images');
     </script>
 </footer>
+    <script>
+        renderMathInElement(document.body, {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        });
+    </script>
 
 </html>
